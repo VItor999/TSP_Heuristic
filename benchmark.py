@@ -6,11 +6,9 @@ from ortools.constraint_solver import pywrapcp
 # We intentionally modified it the least possible in order to compare the results obtained by the group
 # with a standard solution that anyone can have access and is easy to use without know what is "under the hood";
 
-def find_route(manager, routing, solution):  
+def find_route(routing, solution):  
     '''
     Prints benchmark solution
-    :param manager: solution manager
-    :type manager: RoutingIndexManager
     :param routing: solution routing
     :type routing: RoutingModel
     :param solution: solution data

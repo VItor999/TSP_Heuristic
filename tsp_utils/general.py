@@ -1,4 +1,5 @@
 import math
+import random
 import matplotlib.pyplot as plt
 
 def create_data_model(locations = None):
@@ -32,7 +33,7 @@ def plot_points(points, title = ""):
     plt.xlim(0, 1000)
     plt.ylim(0, 1000)
 
-    plt.title('title')
+    plt.title(title)
     plt.grid(True)
     plt.show()
     
@@ -168,7 +169,7 @@ def parse_input(filename = "teste1.txt"):
     return locations
     
 
-def plot_locations_with_connections(locations, connections):
+def plot_locations_with_connections(locations, connections, title = "Empty Title"):
     '''
     This function will generate the graph of the calculated route
 
@@ -176,6 +177,8 @@ def plot_locations_with_connections(locations, connections):
     :type locations: list[tuple(int, int)]
     :param connections: list with the connections between points
     :type connections: list[int]
+    :param title: title of th graph, default to "Empty title"
+    :type title: str
     '''
     x_coords, y_coords = zip(*locations)
     
@@ -199,9 +202,9 @@ def plot_locations_with_connections(locations, connections):
 
     plt.xlabel("X Coordinates")
     plt.ylabel("Y Coordinates")
-    plt.title("Locations with Connections")
+    plt.title(title)
     plt.grid(True)
-    plt.show()
+    plt.show(block=False)
     
 
 def compute_euclidean_distance_matrix(locations, print_matrix = False):
@@ -284,12 +287,39 @@ def calculate_route_distance(distance_matrix, route):
 
     return total_distance
 
+
+def print_route(route):
+    '''
+    Prints a route 
+
+    :param route: list of sequential cities to visit
+    :type route: list(int)
+    '''
+    for index in range(0,len(route)):
+        if index != len(route)-1:
+            print(f"{route[index]:2d}", end="->")
+        else:
+            print(f"{route[index]:2d}")
+            
+def generate_random_points(num_points = 20):
+    '''
+    Generates random points with range 0 - 1000
+
+    :param num_points: number of cities to generate, defaults to 20
+    :type num_points: int, optional
+    :return: list with tuples of the points generated 
+    :rtype: list[tuple(int, int)]
+    '''
+    points = [(random.randint(0, 1000), random.randint(0, 1000)) for _ in range(num_points)]
+    return points
+            
+            
 if __name__ == "__main__":
     # Generate hexagon points
     points = generate_form_points(4, "square")
     
     compute_euclidean_distance_matrix(points,True)
     # Plot the hexagon points with labels
-    plot_points(points)
-    
+    plot_points(points,"Cities to visit")
+    input("Press Enter to exit...\n")    
    
