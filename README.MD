@@ -15,6 +15,7 @@ The TSP requires finding the shortest possible route that visits each city exact
 
 ### Files
 - **`benchmark.py`**: Python implementation to solve the TSP using Google-OR.
+- **`GA_implemented.py`**: Python implementation of a genetic algorithm GA solve the TSP developed by the students.
 - **`main.py`**: Python script that is responsible to call both the benchmark solution and the developed solution and calculate specific metrics in order to deliver information about the desired performance metrics.
 - **`README.md`**: This documentation file.
 - **`trab1-2024_2.pdf`**: The complete description of the task. This document is in portuguese.
