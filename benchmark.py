@@ -40,7 +40,7 @@ def print_solution(manager, routing, solution):
     :return: None
     :rtype: _type_
     '''
-    print(f"Objective: {solution.ObjectiveValue()}")
+    print(f"Objective: {solution.ObjectiveValue()} m")
     index = routing.Start(0)
     plan_output = "Route:\n"
     route_distance = 0

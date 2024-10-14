@@ -40,7 +40,7 @@ if __name__ == "__main__":
     
     print("################# Custom GA Solution #################")
     solution_GA = GA_implemented(data_model,num_generations=500)
-    print(f"Distance: {solution_GA[2]:.2f}\n")
+    print(f"Distance: {solution_GA[2]:.2f}  m\n")
     print_route(solution_GA[1])
     plot_locations_with_connections(data_model["locations"], solution_GA[1], "Solution found using custom GA")
     input("Press Enter to exit...\n")
