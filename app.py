@@ -7,6 +7,12 @@ import dash_bootstrap_components as dbc
 from GA_implemented import GA_implemented
 from benchmark import benchmark, find_route
 from tsp_utils.general import *
+import base64
+import logging
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 
 # Create Dash app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -176,10 +182,11 @@ app.layout = html.Div(
         ),
         # Notification for file upload
         html.Div(id="upload-notification", children=[]),
+        # Store to hold parsed file data
+        dcc.Store(id='parsed-data-store', storage_type='memory')
     ],
 )
 
-# Callback to show/hide file upload field based on radio button selection
 @app.callback(
     Output("file-upload-div", "style"),
     [Input("radio-options", "value")],
@@ -190,24 +197,73 @@ def toggle_file_upload(radio_value):
     else:
         return {"display": "none"}
 
-# Callback to show a notification when a file is uploaded
+# Callback to parse uploaded file and store data
 @app.callback(
-    Output("upload-notification", "children"),
+    [Output("upload-notification", "children"), Output("parsed-data-store", "data")],
     [Input("file-upload", "contents")],
     [State("file-upload", "filename")],
 )
-def show_upload_notification(contents, filename):
-    if contents is not None:
-        return dbc.Toast(
-            f"File '{filename}' uploaded successfully!",
-            id="file-upload-toast",
-            header="Upload Notification",
-            icon="success",
-            dismissable=True,
-            duration=4000,
-            style={"position": "fixed", "top": "10px", "right": "10px"},
-        )
-    return []
+def parse_input(contents, filename):
+    if contents is not None and filename != '':
+        content_type, content_string = contents.split(',')
+        decoded = base64.b64decode(content_string)
+
+        try:
+            if filename.endswith('.csv') or filename.endswith('.txt'):
+                # Read the file using standard tools
+                decoded_text = decoded.decode('utf-8')
+                lines = decoded_text.strip().split("\n")
+                if len(lines) != 2:
+                    raise ValueError("The file must contain exactly two lines.")
+                    
+                # Parse each line into a list of numbers
+                x_v = [int(num) for num in lines[0].split()]
+                y_v = [int(num) for num in lines[1].split()]
+
+                # Print out or use the parsed data
+                print("Line 1 Data:", x_v)
+                print("Line 2 Data:", y_v)
+                parsed_data = list(zip(x_v, y_v))
+                return (
+                    dbc.Toast(
+                        f"File '{filename}' uploaded and parsed successfully!",
+                        id="file-upload-toast",
+                        header="Upload Notification",
+                        icon="success",
+                        dismissable=True,
+                        duration=4000,
+                        style={"position": "fixed", "top": "10px", "right": "10px"},
+                    ),
+                    parsed_data 
+                )
+            else:
+                return (
+                    dbc.Toast(
+                        f"Unsupported file type '{filename}'",
+                        id="file-upload-toast",
+                        header="Upload Error",
+                        icon="danger",
+                        dismissable=True,
+                        duration=4000,
+                        style={"position": "fixed", "top": "10px", "right": "10px"},
+                    ),
+                    None
+                )
+        except Exception as e:
+            return (
+                dbc.Toast(
+                    f"There was an error processing the file: {str(e)}",
+                    id="file-upload-toast",
+                    header="Upload Error",
+                    icon="danger",
+                    dismissable=True,
+                    duration=4000,
+                    style={"position": "fixed", "top": "10px", "right": "10px"},
+                ),
+                None
+            )
+    return None, None
+
 
 # Callback to update the plots when the "Execute" button is clicked
 @app.callback(
@@ -215,7 +271,7 @@ def show_upload_notification(contents, filename):
     [Input("execute-button", "n_clicks")],
     [
         State("radio-options", "value"),
-        State("file-upload", "contents"),
+        State("parsed-data-store", "data"),
         State("num-cities", "value"),
         State("population-size", "value"),
         State("num-generations", "value"),
@@ -224,23 +280,17 @@ def show_upload_notification(contents, filename):
         State("elite-size", "value"),
     ],
 )
-def update_plots(n_clicks, selected_option, uploaded_file, num_cities, population_size,
+def update_plots(n_clicks, selected_option, uploaded_data, num_cities, population_size,
                  num_generations, mutation_rate, tournament_size, elite_size ):
     num_cities = num_cities
-    
-    if (uploaded_file != None):
-        parse_input(uploaded_file)
+    cities = None
+    if selected_option == "file" and uploaded_data is not None:
+        print(uploaded_data)
+        cities = uploaded_data
     elif selected_option == "random":
         cities = generate_random_points(num_cities )
     else:
         cities = generate_form_points(num_cities,selected_option)
-  
-    print(f"num_cities: {num_cities}")
-    print(f"population_size: {population_size}")
-    print(f"num_generations: {num_generations}")
-    print(f"mutation_rate: {mutation_rate}")
-    print(f"tournament_size: {tournament_size}")
-    print(f"elite_size: {elite_size}")
 
     data_model = create_data_model(cities)
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
@@ -255,7 +305,7 @@ def update_plots(n_clicks, selected_option, uploaded_file, num_cities, populatio
 
     
     print("################# Custom GA Solution #################")
-    solution_GA = GA_implemented(data_model,num_generations=500)
+    solution_GA = GA_implemented(data_model,population_size,num_generations,mutation_rate,tournament_size,elite_size)
     print(f"Distance: {solution_GA[2]:.2f} m\n")
     route_GA = solution_GA[1]
     print("Route GA:\n\t",end = "")
@@ -339,4 +389,4 @@ def update_plots(n_clicks, selected_option, uploaded_file, num_cities, populatio
 
 # Run app
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=False)
