@@ -209,7 +209,7 @@ def next_generation(current_gen, distance_matrix,mutation_rate = 0.01, tournamen
     :type current_gen: list[list[int]]
     :param distance_matix: Matrix with the distance form point to point
     :type distance_matix: dict
-    :param mutation_rate: _description_, defaults to 0.01
+    :param mutation_rate: possibility of mutation, defaults to 0.01
     :type mutation_rate: float, optional
     :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 5
     :type tournament_size: int, optional
@@ -228,6 +228,24 @@ def next_generation(current_gen, distance_matrix,mutation_rate = 0.01, tournamen
 
 def GA_implemented(cities = None,population_size = 100, num_generations = 100, mutation_rate = 0.01,
                    tournament_size = 5, elite_size = 5):
+    '''
+    Execute the genetic algorithm (GA) proposed
+
+    :param cities: postion of the cities, defaults to None
+    :type cities: list[tuple(int,int)], optional
+    :param population_size: Number of beings in the population, defaults to 100
+    :type population_size: int, optional
+    :param num_generations: Number of the generations to run the GA, defaults to 100
+    :type num_generations: int, optional
+    :param mutation_rate: possibility of mutation, defaults to 0.01
+    :type mutation_rate: float, optional
+    :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 5
+    :type tournament_size: int, optional
+    :param elite_size: Elite size/elements that will be copied directly, defaults to 5
+    :type elite_size: int, optional
+    :return: tuple with a list of the distances for each generation, the best route and the distance for the best route
+    :rtype: tuple(list[int], list[int], int)
+    '''
     # Define the number of cities and the population size
     #locations = generate_form_points(4,"square")
     data_model = None
@@ -240,7 +258,7 @@ def GA_implemented(cities = None,population_size = 100, num_generations = 100, m
 
     # Calculate the distance matrix between all pairs of cities
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
-    """Main function to run the Genetic Algorithm."""
+    
     pop = initial_population(num_cities, population_size)
     progress = []
 
