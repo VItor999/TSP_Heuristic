@@ -3,6 +3,13 @@ from benchmark import benchmark, print_solution , find_route
 from tsp_utils.general import *
 import argparse  
 
+#TODO 
+#  - MUST: add here, or in other script a loop to generate the data that will be presented
+#   like run 100 for each geometric form and random input with 12 24 36 48 cities 
+#   save all this data in a ordered manner. At least save the route, and the distance achieved in 
+#   each configuration as well as the answer that the benchmark gave
+#   think how we want to display this data 
+
 if __name__ == "__main__":
     # Initialize the argument parser
     parser = argparse.ArgumentParser(description='Benchmark X Genetic Algorithm test')

@@ -13,6 +13,11 @@ import logging
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
+#TODO List:
+#  - MUST: Clean this code and reorganize it. 
+#  - MUST: Add more features to the statistics tab
+#  - MUST: Document this code
+#  - EXTRA: Add third tab with the population information per generation 
 
 # Create Dash app
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])

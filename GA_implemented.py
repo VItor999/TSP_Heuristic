@@ -1,5 +1,11 @@
 from tsp_utils.general import *
 
+#TODO List:
+#  - MUST: Create class for each solution/being in the population. 
+#  - MUST: Fill this being data accordingly 
+#  - MUST: Make some more sense of the code implement, somehow I think the population is getting smaller? 
+#  - EXTRA: Try to make the algorithm better. Right now is working "ok"
+
 def create_route(num_cities):
     '''
     Creates a random tour (route) of the cities.
@@ -9,7 +15,6 @@ def create_route(num_cities):
     :return: list with a random tour of the cities 
     :rtype: list[int]
     '''
-    
     route = list(range(num_cities))
     random.shuffle(route)
     return route
