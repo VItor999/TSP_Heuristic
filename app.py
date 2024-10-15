@@ -22,6 +22,51 @@ app.layout = html.Div(
     style={"backgroundColor": "#1e1e1e", "color": "white", "padding": "20px"},
     children=[
         html.H1(
+            "Genetic Algorithm Application",
+            style={"textAlign": "center", "color": "white", "marginBottom": "20px"},
+        ),
+        dcc.Tabs(
+            id="tabs",
+            value='main',
+            children=[
+                dcc.Tab(label='Genetic Algorithm Dashboard', value='main', style={'backgroundColor': '#333', 'color': 'white'},
+                        selected_style={'backgroundColor': '#007bff', 'color': 'white'}),
+                dcc.Tab(label='Statistics', value='statistics', style={'backgroundColor': '#333', 'color': 'white'},
+                        selected_style={'backgroundColor': '#007bff', 'color': 'white'}),
+            ],
+            style={'marginBottom': '20px'}
+        ),
+        html.Div(id='tabs-content', style={'backgroundColor': '#1e1e1e', 'padding': '20px'}),
+        dcc.Store(id='shared-data-store', storage_type='memory')
+    ]
+)
+
+statatistics_tab_layout =html.Div(
+            style={"backgroundColor": "#333", "padding": "20px", "borderRadius": "10px"},
+            children=[
+                html.H2("Statistics", style={"color": "white", "textAlign": "center", "marginBottom": "20px"}),
+                html.P("Here you can display various statistics related to the Genetic Algorithm runs.", style={"color": "white", "textAlign": "center"}),
+                html.Div(
+                    style={"marginTop": "20px", "display": "flex", "justifyContent": "center", "alignItems": "center"},
+                    children=[
+                        html.Div(
+                            style={"width": "80%", "backgroundColor": "#1e1e1e", "padding": "20px", "borderRadius": "10px"},
+                            children=[
+                                        html.H4('Statistics from Generated Data'),
+                                        html.Div(id='statistics-output')
+                                # You can add more detailed statistics here
+                            ],
+                        )
+                    ],
+                )
+            ]
+        )
+
+# App layout
+execute_tab = html.Div(
+    style={"backgroundColor": "#1e1e1e", "color": "white", "padding": "20px"},
+    children=[
+        html.H1(
             "Genetic Algorithm Dashboard",
             style={"textAlign": "left", "color": "white", "marginBottom": "20px"},
         ),
@@ -187,6 +232,15 @@ app.layout = html.Div(
     ],
 )
 
+# Callback to update content based on selected tab
+@app.callback(Output('tabs-content', 'children'), [Input('tabs', 'value')])
+def update_tab_content(tab_name):
+    if tab_name == 'main':
+       return execute_tab
+    elif tab_name == 'statistics':
+        return statatistics_tab_layout
+
+
 @app.callback(
     Output("file-upload-div", "style"),
     [Input("radio-options", "value")],
@@ -267,7 +321,7 @@ def parse_input(contents, filename):
 
 # Callback to update the plots when the "Execute" button is clicked
 @app.callback(
-    [Output("plot1", "figure"), Output("plot2", "figure")],
+    [Output("plot1", "figure"), Output("plot2", "figure"),  Output('shared-data-store', 'data')],
     [Input("execute-button", "n_clicks")],
     [
         State("radio-options", "value"),
@@ -385,8 +439,38 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, populatio
         yaxis_title="Y Coordinates",
         showlegend=False,
     )
-    return fig1, fig2
+    return (fig1, fig2, solution_GA)
 
+
+@app.callback(
+    Output('statistics-output', 'children'),
+    Input('shared-data-store', 'data'),
+)
+def display_statistics(data):
+    #TODO add benchmark statistics for comparison sake
+    #TODO Create a table with the results for each 10 generations 
+    #TODO Plot graph of the route distance progress on the side of the table
+    if data is not None:
+        distance = data[2]
+        route = data[1]
+
+        # Create list of HTML elements to display each line separately
+        stats = [
+            html.P(f"Distance: {distance:.2f} m"),
+            html.P("Route:"),
+        ]
+        str = ""
+        #TODO remove this code and make the print_route used here
+        for index in range(0,len(route)):
+            if index != len(route)-1:
+                str+=f"{route[index]:2d} -> "
+            else:
+                str+=f"{route[index]:2d}"
+        stats.append(html.P(str))  # Loop back to the start
+
+        return stats
+    else:
+        return 'No data available.'
 # Run app
 if __name__ == "__main__":
     app.run_server(debug=False)
