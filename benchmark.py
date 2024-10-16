@@ -109,5 +109,6 @@ def benchmark(locations = None, points_num = 4, shape = 'square'):
 if __name__ == "__main__":
     solution = benchmark(points_num = 20, shape = 'square')
     print_solution(solution[0], solution[1], solution[2])
-    route = find_route(solution[0], solution[1], solution[2])
+    route = find_route(solution[1], solution[2])
     plot_locations_with_connections(solution[3]["locations"], route)
+    input("Press Enter to exit...\n")
