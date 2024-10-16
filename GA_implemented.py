@@ -1,10 +1,12 @@
 from tsp_utils.general import *
+from tsp_utils.Being import Being
 
 #TODO List:
 #  - MUST: Create class for each solution/being in the population. 
 #  - MUST: Fill this being data accordingly 
 #  - MUST: Make some more sense of the code implement, somehow I think the population is getting smaller? 
 #  - EXTRA: Try to make the algorithm better. Right now is working "ok"
+
 
 def create_route(num_cities):
     '''
@@ -30,8 +32,11 @@ def initial_population(num_cities, population_size):
     :return: list containing the route for each member of the population
     :rtype: list[list[int]]
     '''
-    
-    return [create_route(num_cities) for _ in range(population_size)]
+    population = []
+    for _ in range(population_size):
+        b = Being(create_route(num_cities), [0,0] , 0, 0)
+        population.append(b)
+    return population
 
 def route_distance(route, distance_matix):
     '''
@@ -79,9 +84,20 @@ def rank_routes(population, distance_matrix):
     :return: population resorted based on best route 
     :rtype: list[list[int]]
     '''
-    
-    fitness_results = [(route, fitness(route, distance_matrix)) for route in population]
-    return sorted(fitness_results, key=lambda x: x[1], reverse=True)
+    fitness_results = []
+    for being in population:
+        f = fitness(being.route, distance_matrix)
+        being.fitness = f
+        fitness_results.append(f)
+   
+    sorted_population = sort_population_by_fitness(population)
+    return sorted_population
+
+def sort_population_by_fitness(population):
+    """Sort population of beings by fitness in ascending order."""
+    # Sort the population in place based on the fitness attribute
+    population.sort(key=lambda being: being.fitness, reverse=True) 
+    return population
 
 def selection(pop_ranked, elite_size = 5, tournament_size = 5):
     '''
@@ -99,14 +115,15 @@ def selection(pop_ranked, elite_size = 5, tournament_size = 5):
     
     selection_results = []
     for elite in range(elite_size):
-        selection_results.append(pop_ranked[elite][0])
+        selection_results.append(pop_ranked[elite])
     for _ in range(len(pop_ranked) - elite_size):
-        tournament = random.sample(pop_ranked, tournament_size)
-        winner = max(tournament, key=lambda x: x[1])[0]
+        tournament_candidates = random.sample(pop_ranked, tournament_size)
+        sorted = sort_population_by_fitness(tournament_candidates)
+        winner = sorted[0]
         selection_results.append(winner)
     return selection_results
 
-def breed(parent1, parent2):
+def breed(parent1, parent2, gen):
     '''
     Breeds two parents to generate a new elements.Performs Order Crossover (OX) to create a child route
 
@@ -118,8 +135,8 @@ def breed(parent1, parent2):
     :rtype: list[int]
     '''
     
-    num_cities = len(parent1)
-    child = [None] * num_cities
+    num_cities = len(parent1.route)
+    child_route = [None] * num_cities
 
     # Select a subset from parent1
     gene_a = int(random.random() * num_cities)
@@ -129,19 +146,22 @@ def breed(parent1, parent2):
     end_gene = max(gene_a, gene_b)
 
     # Copy the subset to the child
-    child[start_gene:end_gene] = parent1[start_gene:end_gene]
+    child_route[start_gene:end_gene] = parent1.route[start_gene:end_gene]
 
     # Fill the remaining positions with genes from parent2
-    parent2_genes = [gene for gene in parent2 if gene not in child]
+    parent2_genes = [gene for gene in parent2.route if gene not in child_route]
     current_pos = 0
     for i in range(num_cities):
-        if child[i] is None:
-            child[i] = parent2_genes[current_pos]
+        if child_route[i] is None:
+            child_route[i] = parent2_genes[current_pos]
             current_pos += 1
-
+    parents_ids = [parent1.id, parent2.id]
+    mutation = 0
+    
+    child = Being(child_route, parents_ids, mutation, gen)
     return child
 
-def breed_population(mating_pool, elite_size = 5):
+def breed_population(mating_pool, elite_size = 5, gen = 0):
     '''
     Creates a new population through crossover.
 
@@ -156,15 +176,17 @@ def breed_population(mating_pool, elite_size = 5):
     length = len(mating_pool)
     pool = random.sample(mating_pool, len(mating_pool))
 
+    #direct copy of the elite
     for i in range(elite_size):
         children.append(mating_pool[i])
 
+    #the rest
     for i in range(elite_size, length):
-        child = breed(pool[i - elite_size], pool[length - i - 1])
+        child = breed(pool[i - elite_size], pool[length - i - 1], gen)
         children.append(child)
     return children
 
-def mutate(route, mutation_rate=0.01):
+def mutate(being, mutation_rate=0.01):
     '''
     Performs swap mutation on a route
 
@@ -175,18 +197,21 @@ def mutate(route, mutation_rate=0.01):
     :return: mutated route/individual
     :rtype: list[int]
     '''
- 
+    route = being.route
     num_cites = len(route)
+    mutated = False
     for swapped in range(num_cites):
         if random.random() < mutation_rate:
             swap_with = int(random.random() * num_cites)
-
             city1 = route[swapped]
             city2 = route[swap_with]
-
             route[swapped] = city2
             route[swap_with] = city1
-    return route
+            mutated = True
+    if mutated == True:
+        being.update_mutation_number(1)
+    being.route = route
+    return being
 
 def mutate_population(population, mutation_rate=0.01 ):
     '''
@@ -206,7 +231,7 @@ def mutate_population(population, mutation_rate=0.01 ):
         mutated_pop.append(mutated_ind)
     return mutated_pop
 
-def next_generation(current_gen, distance_matrix,mutation_rate = 0.01, tournament_size = 5, elite_size = 5):
+def next_generation(genID, current_gen, distance_matrix,mutation_rate = 0.01, tournament_size = 5, elite_size = 5):
     '''
     Creates the next generation.
 
@@ -227,11 +252,11 @@ def next_generation(current_gen, distance_matrix,mutation_rate = 0.01, tournamen
     pop_ranked = rank_routes(current_gen, distance_matrix)
     selection_results = selection(pop_ranked, elite_size, tournament_size)
     mating_pool = selection_results
-    children = breed_population(mating_pool, elite_size)
+    children = breed_population(mating_pool, elite_size,genID)
     next_gen = mutate_population(children,mutation_rate)
     return next_gen
 
-def GA_implemented(cities = None,population_size = 100, num_generations = 100, mutation_rate = 0.01,
+def GA_implemented(data_model = None,population_size = 100, num_generations = 100, mutation_rate = 0.01,
                    tournament_size = 5, elite_size = 5):
     '''
     Execute the genetic algorithm (GA) proposed
@@ -251,13 +276,12 @@ def GA_implemented(cities = None,population_size = 100, num_generations = 100, m
     :return: tuple with a list of the distances for each generation, the best route and the distance for the best route
     :rtype: tuple(list[int], list[int], int)
     '''
+    Being.reset_ids()
     # Define the number of cities and the population size
     #locations = generate_form_points(4,"square")
-    data_model = None
-    if(cities == None):
+    if(data_model == None):
         data_model = create_data_model()
-    else:
-        data_model = cities
+        
     num_cities = len(data_model["locations"])
     
 
@@ -267,26 +291,27 @@ def GA_implemented(cities = None,population_size = 100, num_generations = 100, m
     pop = initial_population(num_cities, population_size)
     progress = []
 
-    print("Initial distance: " + str(1 / rank_routes(pop, distance_matrix)[0][1]))
+    print("Initial distance: " + str(1 / rank_routes(pop, distance_matrix)[0].fitness))
 
     for i in range(num_generations):
-        pop = next_generation(pop,distance_matrix,mutation_rate,tournament_size,elite_size)
-        best_distance = 1 / rank_routes(pop,distance_matrix)[0][1]
+        pop = next_generation(i+1,pop,distance_matrix,mutation_rate,tournament_size,elite_size)
+        best_distance = 1 / rank_routes(pop,distance_matrix)[0].fitness
         progress.append(best_distance)
         if i % 20 == 0:
             print(f"Generation {i:4d} distance: {best_distance:.2f}")
 
-    print("Final distance: " + str(1 / rank_routes(pop, distance_matrix)[0][1]))
-    best_route_index = rank_routes(pop, distance_matrix)[0][0]
-    best_route = best_route_index
+    pop = rank_routes(pop, distance_matrix)
+    best_route = (pop[0].route)
     best_route.append(best_route[0])
+    print("Final distance: " + str(1 / pop[0].fitness))
+    print(pop[0].get_info())
     return (progress, best_route,  best_distance)
 
 
 if __name__ == "__main__":
-    data_model = create_data_model()
-    num_cities = len(data_model["locations"])
-    solution = GA_implemented(num_generations=50)
+    points = generate_form_points(10, "square")
+    data_model = create_data_model(points)
+    solution = GA_implemented(data_model,num_generations=50)
     print_route(solution[1])
     plot_locations_with_connections(data_model["locations"], solution[1])
     input("Press Enter to exit...\n")
