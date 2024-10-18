@@ -71,171 +71,323 @@ statatistics_tab_layout =html.Div(
 execute_tab = html.Div(
     style={"backgroundColor": "#1e1e1e", "color": "white", "padding": "20px"},
     children=[
-        html.H1(
-            "Genetic Algorithm Dashboard",
-            style={"textAlign": "left", "color": "white", "marginBottom": "20px"},
-        ),
         html.Div(
-            style={"display": "flex", "flexDirection": "row"},
+            style={"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "alignItems": "center"},
             children=[
-                # Plot 1
+                # Plot 1 with total distance label
                 html.Div(
-                    dcc.Graph(id="plot1"),
-                    style={"width": "49%", "marginRight": "2%", "backgroundColor": "#333"},
+                    children=[
+                        dcc.Graph(id="plot1"),
+                        html.Div(
+                            children=[
+                                html.Label(
+                                    id="total-distance-label-plot1",
+                                    children="Distance: 0 m",
+                                    style={
+                                        "color": "white",
+                                        "fontSize": "18px",
+                                        "textAlign": "center",
+                                        "display": "block",
+                                    },
+                                ),
+                            ],
+                            style={"marginTop": "10px", "textAlign": "center"},
+                        ),
+                    ],
+                    style={"width": "49%", "backgroundColor": "#333", "padding": "10px", "borderRadius": "10px"},
                 ),
-                # Plot 2
+                # Plot 2 with total distance label
                 html.Div(
-                    dcc.Graph(id="plot2"),
-                    style={"width": "49%", "backgroundColor": "#333"},
+                    children=[
+                        dcc.Graph(id="plot2"),
+                        html.Div(
+                            children=[
+                                html.Label(
+                                    id="total-distance-label-plot2",
+                                    children="Distance: 0 m",
+                                    style={
+                                        "color": "white",
+                                        "fontSize": "18px",
+                                        "textAlign": "center",
+                                        "display": "block",
+                                    },
+                                ),
+                            ],
+                            style={"marginTop": "10px", "textAlign": "center"},
+                        ),
+                    ],
+                    style={"width": "49%", "backgroundColor": "#333", "padding": "10px", "borderRadius": "10px"},
                 ),
             ],
         ),
-        # Control panel with radio buttons, text fields, and execute button
+        # Scaled content starts here
         html.Div(
             style={
-                "marginTop": "40px",
-                "padding": "20px",
-                "backgroundColor": "#333",
-                "borderRadius": "10px",
-                "textAlign": "center",
+                "transform": "scale(0.75)",  # Apply scaling to 75%
+                "transformOrigin": "top left",  # Keep scaling from the top left corner
+                "width": "133%",  # Compensate width for scaling to fit the space
             },
             children=[
-                # Label for radio button group
-                html.Label(
-                    "City Distribution Options:",
-                    style={"color": "white", "fontSize": "22px", "fontWeight": "bold", "display": "block", "marginBottom": "15px"},
-                ),
-                # Radio buttons for selecting options (including Upload File option)
-                dcc.RadioItems(
-                    id="radio-options",
-                    options=[
-                        {"label": "Random", "value": "random"},
-                        {"label": "Square", "value": "square"},
-                        {"label": "Circle", "value": "circle"},
-                        {"label": "Triangle", "value": "triangle"},
-                        {"label": "Hexagon", "value": "hexagon"},
-                        {"label": "Upload File", "value": "file"},
-                    ],
-                    value="square",
-                    style={"marginBottom": "20px", "color": "white"},
-                    labelStyle={"display": "inline-block", "marginRight": "20px", "fontSize": "20px"},
-                    inputStyle={"marginRight": "10px", "transform": "scale(1.8)"},
-                ),
-                # File upload field (shown only when Upload File is selected)
-                html.Div(
-                    id="file-upload-div",
-                    children=[
-                        dcc.Upload(
-                            id="file-upload",
-                            children=html.Div(["Drag and Drop or ", html.A("Select a File")]),
-                            style={
-                                "width": "50%",
-                                "height": "60px",
-                                "lineHeight": "60px",
-                                "borderWidth": "1px",
-                                "borderStyle": "dashed",
-                                "borderRadius": "10px",
-                                "textAlign": "center",
-                                "margin": "auto",
-                                "color": "white",
-                            },
-                            multiple=False,
-                        )
-                    ],
-                    style={"display": "none"},
-                ),
-                html.Br(),
-                # Label for GA algorithm parameters
-                html.Label(
-                    "GA Algorithm Parameters:",
-                    style={"color": "white", "fontSize": "22px", "fontWeight": "bold", "display": "block", "marginBottom": "15px"},
-                ),
-                # Text fields for parameters (aligned properly)
-                html.Div(
-                    style={"marginTop": "20px", "display": "grid", "gridTemplateColumns": "repeat(3, 1fr)", "gap": "30px"},
-                    children=[
-                        # Number of Cities
-                        html.Div(
-                            children=[
-                                html.Label("num_cities:", style={"color": "white", "fontSize": "20px", "marginBottom": "8px"}),
-                                dcc.Input(id="num-cities", type="number", value=20, style={"width": "100%", "padding": "8px", "borderRadius": "5px"}),
-                            ],
-                            style={"textAlign": "left"},
-                        ),
-                        # Population Size
-                        html.Div(
-                            children=[
-                                html.Label("population_size:", style={"color": "white", "fontSize": "20px", "marginBottom": "8px"}),
-                                dcc.Input(id="population-size", type="number", value=100, style={"width": "100%", "padding": "8px", "borderRadius": "5px"}),
-                            ],
-                            style={"textAlign": "left"},
-                        ),
-                        # Number of Generations
-                        html.Div(
-                            children=[
-                                html.Label("num_generations:", style={"color": "white", "fontSize": "20px", "marginBottom": "8px"}),
-                                dcc.Input(id="num-generations", type="number", value=100, style={"width": "100%", "padding": "8px", "borderRadius": "5px"}),
-                            ],
-                            style={"textAlign": "left"},
-                        ),
-                        # Mutation Rate
-                        html.Div(
-                            children=[
-                                html.Label("mutation_rate:", style={"color": "white", "fontSize": "20px", "marginBottom": "8px"}),
-                                dcc.Input(id="mutation-rate", type="number", value=0.01, step=0.01, style={"width": "100%", "padding": "8px", "borderRadius": "5px"}),
-                            ],
-                            style={"textAlign": "left"},
-                        ),
-                        # Tournament Size
-                        html.Div(
-                            children=[
-                                html.Label("tournament_size:", style={"color": "white", "fontSize": "20px", "marginBottom": "8px"}),
-                                dcc.Input(id="tournament-size", type="number", value=5, style={"width": "100%", "padding": "8px", "borderRadius": "5px"}),
-                            ],
-                            style={"textAlign": "left"},
-                        ),
-                        # Elite Size
-                        html.Div(
-                            children=[
-                                html.Label("elite_size:", style={"color": "white", "fontSize": "20px", "marginBottom": "8px"}),
-                                dcc.Input(id="elite-size", type="number", value=5, style={"width": "100%", "padding": "8px", "borderRadius": "5px"}),
-                            ],
-                            style={"textAlign": "left"},
-                        ),
-                    ],
-                ),
-                html.Br(),
-                # Execute button centered in the container
+                # Control panel with radio buttons, text fields, and execute button
                 html.Div(
                     style={
-                        "marginTop": "30px",
-                        "display": "flex",
-                        "justifyContent": "center",
-                        "alignItems": "center",
+                        "marginTop": "40px",
+                        "padding": "20px",
+                        "backgroundColor": "#333",
+                        "borderRadius": "10px",
+                        "textAlign": "center",
                     },
                     children=[
-                        html.Button(
-                            "Execute", id="execute-button", n_clicks=0,
+                        # Label for radio button group
+                        html.Label(
+                            "City Distribution Options:",
                             style={
-                                "padding": "20px 40px",
-                                "fontSize": "18px",
-                                "borderRadius": "10px",
-                                "backgroundColor": "#007bff",
                                 "color": "white",
-                                "border": "none",
-                                "cursor": "pointer",
-                            }
+                                "fontSize": "22px",
+                                "fontWeight": "bold",
+                                "display": "block",
+                                "marginBottom": "15px",
+                            },
+                        ),
+                        # Radio buttons for selecting options (including Upload File option)
+                        dcc.RadioItems(
+                            id="radio-options",
+                            options=[
+                                {"label": "Random", "value": "random"},
+                                {"label": "Square", "value": "square"},
+                                {"label": "Circle", "value": "circle"},
+                                {"label": "Triangle", "value": "triangle"},
+                                {"label": "Hexagon", "value": "hexagon"},
+                                {"label": "Upload File", "value": "file"},
+                            ],
+                            value="square",
+                            style={"marginBottom": "20px", "color": "white"},
+                            labelStyle={"display": "inline-block", "marginRight": "20px", "fontSize": "20px"},
+                            inputStyle={"marginRight": "10px", "transform": "scale(1.8)"},
+                        ),
+                        # File upload field (shown only when Upload File is selected)
+                        html.Div(
+                            id="file-upload-div",
+                            children=[
+                                dcc.Upload(
+                                    id="file-upload",
+                                    children=html.Div(["Drag and Drop or ", html.A("Select a File")]),
+                                    style={
+                                        "width": "50%",
+                                        "height": "60px",
+                                        "lineHeight": "60px",
+                                        "borderWidth": "1px",
+                                        "borderStyle": "dashed",
+                                        "borderRadius": "10px",
+                                        "textAlign": "center",
+                                        "margin": "auto",
+                                        "color": "white",
+                                    },
+                                    multiple=False,
+                                )
+                            ],
+                            style={"display": "none"},
+                        ),
+                        html.Br(),
+                        # Label for GA algorithm parameters
+                        html.Label(
+                            "GA Algorithm Parameters:",
+                            style={
+                                "color": "white",
+                                "fontSize": "22px",
+                                "fontWeight": "bold",
+                                "display": "block",
+                                "marginBottom": "15px",
+                            },
+                        ),
+                        # Text fields for parameters (aligned properly)
+                        html.Div(
+                            style={
+                                "marginTop": "20px",
+                                "display": "grid",
+                                "gridTemplateColumns": "repeat(3, 1fr)",
+                                "gap": "30px",
+                            },
+                            children=[
+                                # Number of Cities
+                                html.Div(
+                                    children=[
+                                        html.Label(
+                                            "num_cities:",
+                                            style={
+                                                "color": "white",
+                                                "fontSize": "20px",
+                                                "marginBottom": "8px",
+                                            },
+                                        ),
+                                        dcc.Input(
+                                            id="num-cities",
+                                            type="number",
+                                            value=20,
+                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                        ),
+                                    ],
+                                    style={"textAlign": "left"},
+                                ),
+                                # Population Size
+                                html.Div(
+                                    children=[
+                                        html.Label(
+                                            "population_size:",
+                                            style={
+                                                "color": "white",
+                                                "fontSize": "20px",
+                                                "marginBottom": "8px",
+                                            },
+                                        ),
+                                        dcc.Input(
+                                            id="population-size",
+                                            type="number",
+                                            value=100,
+                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                        ),
+                                    ],
+                                    style={"textAlign": "left"},
+                                ),
+                                # Number of Generations
+                                html.Div(
+                                    children=[
+                                        html.Label(
+                                            "num_generations:",
+                                            style={
+                                                "color": "white",
+                                                "fontSize": "20px",
+                                                "marginBottom": "8px",
+                                            },
+                                        ),
+                                        dcc.Input(
+                                            id="num-generations",
+                                            type="number",
+                                            value=100,
+                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                        ),
+                                    ],
+                                    style={"textAlign": "left"},
+                                ),
+                                # Mutation Rate
+                                html.Div(
+                                    children=[
+                                        html.Label(
+                                            "mutation_rate:",
+                                            style={
+                                                "color": "white",
+                                                "fontSize": "20px",
+                                                "marginBottom": "8px",
+                                            },
+                                        ),
+                                        dcc.Input(
+                                            id="mutation-rate",
+                                            type="number",
+                                            value=0.01,
+                                            step=0.005,
+                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                        ),
+                                    ],
+                                    style={"textAlign": "left"},
+                                ),
+                                # Tournament Size
+                                html.Div(
+                                    children=[
+                                        html.Label(
+                                            "tournament_size:",
+                                            style={
+                                                "color": "white",
+                                                "fontSize": "20px",
+                                                "marginBottom": "8px",
+                                            },
+                                        ),
+                                        dcc.Input(
+                                            id="tournament-size",
+                                            type="number",
+                                            value=5,
+                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                        ),
+                                    ],
+                                    style={"textAlign": "left"},
+                                ),
+                                # Elite Size
+                                html.Div(
+                                    children=[
+                                        html.Label(
+                                            "elite_size:",
+                                            style={
+                                                "color": "white",
+                                                "fontSize": "20px",
+                                                "marginBottom": "8px",
+                                            },
+                                        ),
+                                        dcc.Input(
+                                            id="elite-size",
+                                            type="number",
+                                            value=5,
+                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                        ),
+                                    ],
+                                    style={"textAlign": "left"},
+                                ),
+                                html.Div(
+                                    children=[
+                                        html.Label(
+                                            "max_tries:",
+                                            style={
+                                                "color": "white",
+                                                "fontSize": "20px",
+                                                "marginBottom": "8px",
+                                            },
+                                        ),
+                                        dcc.Input(
+                                            id="max_tries",
+                                            type="number",
+                                            value=50,
+                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                        ),
+                                    ],
+                                    style={"textAlign": "left"},
+                                ),
+                            ],
+                        ),
+                        html.Br(),
+                        # Execute button centered in the container
+                        html.Div(
+                            style={
+                                "marginTop": "30px",
+                                "display": "flex",
+                                "justifyContent": "center",
+                                "alignItems": "center",
+                            },
+                            children=[
+                                html.Button(
+                                    "Execute",
+                                    id="execute-button",
+                                    n_clicks=0,
+                                    style={
+                                        "padding": "20px 40px",
+                                        "fontSize": "18px",
+                                        "borderRadius": "10px",
+                                        "backgroundColor": "#007bff",
+                                        "color": "white",
+                                        "border": "none",
+                                        "cursor": "pointer",
+                                    },
+                                ),
+                            ],
                         ),
                     ],
                 ),
+                # Notification for file upload
+                html.Div(id="upload-notification", children=[]),
+                # Store to hold parsed file data
+                dcc.Store(id='parsed-data-store', storage_type='memory')
             ],
         ),
-        # Notification for file upload
-        html.Div(id="upload-notification", children=[]),
-        # Store to hold parsed file data
-        dcc.Store(id='parsed-data-store', storage_type='memory')
     ],
 )
+
 
 # Callback to update content based on selected tab
 @app.callback(Output('tabs-content', 'children'), [Input('tabs', 'value')])
@@ -326,7 +478,8 @@ def parse_input(contents, filename):
 
 # Callback to update the plots when the "Execute" button is clicked
 @app.callback(
-    [Output("plot1", "figure"), Output("plot2", "figure"),  Output('shared-data-store', 'data')],
+    [Output("plot1", "figure"), Output("plot2", "figure"),  Output('shared-data-store', 'data'),
+     Output("total-distance-label-plot1","children"), Output("total-distance-label-plot2","children")],
     [Input("execute-button", "n_clicks")],
     [
         State("radio-options", "value"),
@@ -337,10 +490,11 @@ def parse_input(contents, filename):
         State("mutation-rate", "value"),
         State("tournament-size", "value"),
         State("elite-size", "value"),
+        State("max_tries", "value")
     ],
 )
 def update_plots(n_clicks, selected_option, uploaded_data, num_cities, population_size,
-                 num_generations, mutation_rate, tournament_size, elite_size ):
+                 num_generations, mutation_rate, tournament_size, elite_size, max_tries ):
     num_cities = num_cities
     cities = None
     if selected_option == "file" and uploaded_data is not None:
@@ -358,17 +512,28 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, populatio
     solution_benchmark = benchmark(data_model["locations"])
     route_bench = find_route(solution_benchmark[1], solution_benchmark[2])
     benchmark_dist = calculate_route_distance(distance_matrix, route_bench)
-    print(f"Distance: {benchmark_dist:.2f} m\n")
-    print("Route Bench:\n\t",end = "")
+    str1 = f"Distance: {benchmark_dist:5.0f} m"
+    print(str1)
+    print("Route Benchmark:\n\t",end = "")
     print_route(route_bench)
-
-    
+    distance = 2*benchmark_dist
+    tries = 0 
     print("################# Custom GA Solution #################")
-    solution_GA = GA_implemented(data_model,population_size,num_generations,mutation_rate,tournament_size,elite_size)
-    print(f"Distance: {solution_GA[2]:.2f} m\n")
-    route_GA = solution_GA[1]
-    print("Route GA:\n\t",end = "")
-    print_route(route_GA)
+    GA_best_solution_distance = distance
+    GA_best_solution = None
+    GA_best_route = None
+    while (distance > benchmark_dist) and (tries < max_tries):
+        solution_GA = GA_implemented(data_model,population_size,num_generations,mutation_rate,tournament_size,elite_size)
+        distance = solution_GA[2]
+        str2 = f"Distance: {solution_GA[2]:5.0f} m"
+        print(str2)
+        route_GA = solution_GA[1]
+        print("Route GA:\n\t",end = "")
+        print_route(route_GA)
+        if(distance < GA_best_solution_distance):
+            GA_best_solution_distance = distance
+            GA_best_solution = solution_GA
+            GA_best_route = route_GA
     
     locations = data_model["locations"]
     x_coords, y_coords = zip(*locations)
@@ -400,12 +565,12 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, populatio
 
     # Update layout for fig1
     fig1.update_layout(
-        title=f"Plot 1: {selected_option}",
+        title=f"Benchmark (Google OR), using {selected_option} data: {benchmark_dist:5.0f} m",
         plot_bgcolor="#333",
         paper_bgcolor="#333",
         font={"color": "white"},
-        xaxis_title="X Coordinates",
-        yaxis_title="Y Coordinates",
+        xaxis_title="X [m]",
+        yaxis_title="Y [m]",
         showlegend=False,
     )
 
@@ -423,9 +588,9 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, populatio
     ))
 
     # Add connections (lines between nodes)
-    for i in range(len(route_GA) - 1):
-        start_index = route_GA[i]
-        end_index = route_GA[i + 1]
+    for i in range(len(GA_best_route) - 1):
+        start_index = GA_best_route[i]
+        end_index = GA_best_route[i + 1]
         fig2.add_trace(go.Scatter(
             x=[locations[start_index][0], locations[end_index][0]],
             y=[locations[start_index][1], locations[end_index][1]],
@@ -436,15 +601,15 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, populatio
 
     # Update layout for fig2
     fig2.update_layout(
-        title=f"Plot 2: {selected_option}",
+        title=f"GA Implemented, using {selected_option} data: : {GA_best_solution_distance:5.0f} m",
         plot_bgcolor="#333",
         paper_bgcolor="#333",
         font={"color": "white"},
-        xaxis_title="X Coordinates",
-        yaxis_title="Y Coordinates",
+        xaxis_title="X [m]",
+        yaxis_title="Y [m]",
         showlegend=False,
     )
-    return (fig1, fig2, solution_GA)
+    return (fig1, fig2, GA_best_solution, str1, str2)
 
 
 @app.callback(
