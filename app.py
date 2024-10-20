@@ -343,7 +343,7 @@ execute_tab = html.Div(
                                         dcc.Input(
                                             id="max_tries",
                                             type="number",
-                                            value=30,
+                                            value=1,
                                             style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                         ),
                                     ],
@@ -512,7 +512,7 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, populatio
     solution_benchmark = benchmark(data_model["locations"])
     route_bench = find_route(solution_benchmark[1], solution_benchmark[2])
     benchmark_dist = calculate_route_distance(distance_matrix, route_bench)
-    str1 = f"Distance: {benchmark_dist:5.0f} m"
+    str1 = f"Distance benchmark: {benchmark_dist:5.0f} m"
     print(str1)
     print("Route Benchmark:\n\t",end = "")
     print_route(route_bench)
@@ -522,18 +522,19 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, populatio
     GA_best_solution_distance = distance
     GA_best_solution = None
     GA_best_route = None
-#while (distance > benchmark_dist) and (tries < max_tries):
-    solution_GA = GA_implemented(data_model,population_size,num_generations,mutation_rate,tournament_size,elite_size)
-    distance = solution_GA[2]
-    str2 = f"Distance: {solution_GA[2]:5.0f} m"
-    print(str2)
-    route_GA = solution_GA[1]
-    print("Route GA:\n\t",end = "")
-    print_route(route_GA)
-#    if(distance < GA_best_solution_distance):
-    GA_best_solution_distance = distance
-    GA_best_solution = solution_GA
-    GA_best_route = route_GA
+    while (distance > benchmark_dist) and (tries < max_tries):
+        solution_GA = GA_implemented(data_model,population_size,num_generations,mutation_rate,tournament_size,elite_size)
+        distance = solution_GA[2]
+        str2 = f"Distance: {solution_GA[2]:5.0f} m"
+        print(str2)
+        route_GA = solution_GA[1]
+        print("Route GA:\n\t",end = "")
+        print_route(route_GA)
+        if(distance < GA_best_solution_distance):
+            GA_best_solution_distance = distance
+            GA_best_solution = solution_GA
+            GA_best_route = route_GA
+        tries+=1
     
     locations = data_model["locations"]
     x_coords, y_coords = zip(*locations)
