@@ -193,35 +193,6 @@ def breed_population(mating_pool, elite_size = 3, gen = 0):
         invalid_new_child = True
     return children
 
-def mutate(being, mutation_rate=0.01):
-    '''
-    Performs swap mutation on a route
-
-    :param route: one element of the population
-    :type route: list[int]
-    :param mutation_rate: possibility of mutation, defaults to 0.01 (1%)
-    :type mutation_rate: float, optional
-    :return: mutated route/individual
-    :rtype: list[int]
-    '''
-    route = being.route
-    num_cites = len(route)
-    mutated = False
-    for swapped in range(num_cites):
-        if random.random() < mutation_rate:
-            swap_with = int(random.random() * num_cites)
-            city1 = route[swapped]
-            city2 = route[swap_with]
-            route[swapped] = city2
-            route[swap_with] = city1
-            mutated = True
-    if mutated == True:
-        being.update_mutation_number(1)
-    being.route = route
-    return being
-
-import random
-
 # Swap Mutation
 def swap_mutation(route):
     num_cities = len(route)
@@ -279,7 +250,7 @@ def mutate(being, mutation_rate=0.01):
             ]
             mutation_func = random.choice(mutation_functions)
             route = mutation_func(route)
-            being.update_mutation_number(1)
+            being.update_mutation_number(1,mutation_func.__name__)
             being.route = route
     return being
 
