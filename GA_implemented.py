@@ -99,15 +99,15 @@ def sort_population_by_fitness(population):
     population.sort(key=lambda being: being.fitness, reverse=True) 
     return population
 
-def selection(pop_ranked, elite_size = 5, tournament_size = 5):
+def selection(pop_ranked, elite_size = 3, tournament_size = 3):
     '''
     Selects parent routes using tournament selection
 
     :param pop_ranked: ranked population 
     :type pop_ranked: list[list[int]]
-    :param elite_size: Size of the elite of the population, defaults to 5
+    :param elite_size: Size of the elite of the population, defaults to 3
     :type elite_size: int, optional
-    :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 5
+    :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 3
     :type tournament_size: int, optional
     :return: elements selected to breed
     :rtype: list[list[int]]
@@ -161,13 +161,13 @@ def breed(parent1, parent2, gen):
     child = Being(child_route, parents_ids, mutation, gen)
     return child
 
-def breed_population(mating_pool, elite_size = 5, gen = 0):
+def breed_population(mating_pool, elite_size = 3, gen = 0):
     '''
     Creates a new population through crossover.
 
     :param mating_pool: Selected elements to breed 
     :type mating_pool: list[list[int]]
-    :param elite_size: Elite size/elements that will be copied directly, defaults to 5
+    :param elite_size: Elite size/elements that will be copied directly, defaults to 3
     :type elite_size: int, optional
     :return: new part of the population
     :rtype: list[list[int]]
@@ -180,10 +180,17 @@ def breed_population(mating_pool, elite_size = 5, gen = 0):
     for i in range(elite_size):
         children.append(mating_pool[i])
 
+    invalid_new_child = True
     #the rest
     for i in range(elite_size, length):
-        child = breed(pool[i - elite_size], pool[length - i - 1], gen)
+        while (invalid_new_child):
+            child = breed(pool[i - elite_size], pool[length - i - 1], gen)
+            invalid_new_child = False
+            for valid_child in children:
+                if(valid_child == child):
+                    invalid_new_child = True
         children.append(child)
+        invalid_new_child = True
     return children
 
 def mutate(being, mutation_rate=0.01):
@@ -213,7 +220,72 @@ def mutate(being, mutation_rate=0.01):
     being.route = route
     return being
 
-def mutate_population(population, mutation_rate=0.01 ):
+import random
+
+# Swap Mutation
+def swap_mutation(route):
+    num_cities = len(route)
+    city1 = random.randint(0, num_cities - 1)
+    city2 = random.randint(0, num_cities - 1)
+    route[city1], route[city2] = route[city2], route[city1]
+    return route
+
+# Inversion Mutation
+def inversion_mutation(route):
+    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
+    route[start:end] = route[start:end][::-1]
+    return route
+
+# Scramble Mutation
+def scramble_mutation(route):
+    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
+    subset = route[start:end]
+    random.shuffle(subset)
+    route[start:end] = subset
+    return route
+
+# Insertion Mutation
+def insertion_mutation(route):
+    city_index = random.randint(0, len(route)-1)
+    city = route.pop(city_index)
+    insert_at = random.randint(0, len(route)-1)
+    route.insert(insert_at, city)
+    return route
+
+# Displacement Mutation
+def displacement_mutation(route):
+    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
+    segment = route[start:end]
+    del route[start:end]
+    insert_at = random.randint(0, len(route)-1)
+    route[insert_at:insert_at] = segment
+    return route
+
+
+# Randomly perform one mutation
+def mutate(being, mutation_rate=0.01):
+    """
+    Randomly selects and performs one of the mutation algorithms on a being's route.
+    """
+    route = being.route
+    for i in range(10):
+        if random.random() < mutation_rate:
+            mutation_functions = [
+                swap_mutation,
+                inversion_mutation,
+                scramble_mutation,
+                ##insertion_mutation,
+                displacement_mutation,
+            ]
+            mutation_func = random.choice(mutation_functions)
+            route = mutation_func(route)
+            being.update_mutation_number(1)
+            being.route = route
+    return being
+
+
+
+def mutate_population(population, mutation_rate=0.01, elite_size = 3 ):
     '''
     Applies mutation to the population.
 
@@ -224,14 +296,25 @@ def mutate_population(population, mutation_rate=0.01 ):
     :return: Mutated population 
     :rtype: list[list[int]]
     '''
-    
     mutated_pop = []
-    for ind in range(len(population)):
-        mutated_ind = mutate(population[ind],mutation_rate)
-        mutated_pop.append(mutated_ind)
+   
+    for i in range(elite_size):
+        mutated_pop.append(population[i])
+    invalid_mutation = True
+    length = len(population)
+    #the rest
+    for i in range(elite_size, length):
+        while (invalid_mutation):
+            mutated = mutate(population[i],mutation_rate)
+            invalid_mutation = False
+            for valid_being in mutated_pop:
+                if(valid_being == mutated):
+                    invalid_mutation = True
+        mutated_pop.append(mutated)
+        invalid_mutation = True
     return mutated_pop
 
-def next_generation(genID, current_gen, distance_matrix,mutation_rate = 0.01, tournament_size = 5, elite_size = 5):
+def next_generation(genID, current_gen, distance_matrix,mutation_rate = 0.01, tournament_size = 3, elite_size = 3):
     '''
     Creates the next generation.
 
@@ -241,9 +324,9 @@ def next_generation(genID, current_gen, distance_matrix,mutation_rate = 0.01, to
     :type distance_matix: dict
     :param mutation_rate: possibility of mutation, defaults to 0.01
     :type mutation_rate: float, optional
-    :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 5
+    :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 3
     :type tournament_size: int, optional
-    :param elite_size: Elite size/elements that will be copied directly, defaults to 5
+    :param elite_size: Elite size/elements that will be copied directly, defaults to 3
     :type elite_size: int, optional
     :return: new generation 
     :rtype: list[list[int]]
@@ -252,12 +335,12 @@ def next_generation(genID, current_gen, distance_matrix,mutation_rate = 0.01, to
     pop_ranked = rank_routes(current_gen, distance_matrix)
     selection_results = selection(pop_ranked, elite_size, tournament_size)
     mating_pool = selection_results
-    children = breed_population(mating_pool, elite_size,genID)
+    children = breed_population(mating_pool, elite_size, genID)
     next_gen = mutate_population(children,mutation_rate)
     return next_gen
 
 def GA_implemented(data_model = None,population_size = 100, num_generations = 100, mutation_rate = 0.01,
-                   tournament_size = 5, elite_size = 5):
+                   tournament_size = 3, elite_size = 3):
     '''
     Execute the genetic algorithm (GA) proposed
 
@@ -269,9 +352,9 @@ def GA_implemented(data_model = None,population_size = 100, num_generations = 10
     :type num_generations: int, optional
     :param mutation_rate: possibility of mutation, defaults to 0.01
     :type mutation_rate: float, optional
-    :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 5
+    :param tournament_size: Size of the tournament/number of elements selected to find the best to breed, defaults to 3
     :type tournament_size: int, optional
-    :param elite_size: Elite size/elements that will be copied directly, defaults to 5
+    :param elite_size: Elite size/elements that will be copied directly, defaults to 3
     :type elite_size: int, optional
     :return: tuple with a list of the distances for each generation, the best route and the distance for the best route
     :rtype: tuple(list[int], list[int], int)
@@ -311,7 +394,7 @@ def GA_implemented(data_model = None,population_size = 100, num_generations = 10
 if __name__ == "__main__":
     points = generate_form_points(10, "square")
     data_model = create_data_model(points)
-    solution = GA_implemented(data_model,num_generations=50)
+    solution = GA_implemented(data_model,num_generations=30)
     print_route(solution[1])
     plot_locations_with_connections(data_model["locations"], solution[1])
     input("Press Enter to exit...\n")
