@@ -1,6 +1,8 @@
 from tsp_utils.general import *
 from tsp_utils.SA_Being import SA_Being
 import math
+import numpy as np
+import statistics
 
 
 
@@ -69,6 +71,10 @@ def displacement_neighbor(route):
     route[insert_at:insert_at] = segment
     return route
 
+def cooling(temperature,sigma,delta):
+    standard_dev = statistics.pstdev(sigma)
+    new_temperature = temperature/(1+(np.log(1+delta)*temperature)/(3*standard_dev))
+    return new_temperature
 
 
 def neighbor(route):
@@ -85,7 +91,9 @@ def neighbor(route):
 def neighborhood(being, neighborhood_size, distance_matrix):
     distance = being.distance
     route = being.current_route
-    for j in neighborhood_size:
+    temperature_level_solutions = []
+    temperature_level_distance = []
+    for j in range(neighborhood_size):
         neighbor_route = neighbor(route)
         neighbor_distance = route_distance(neighbor_route,distance_matrix)
         if (neighbor_distance < distance):
@@ -98,13 +106,16 @@ def neighborhood(being, neighborhood_size, distance_matrix):
                 being.set_current_route(neighbor_route)
                 being.distance = neighbor_distance
         distance = being.distance
+        temperature_level_solutions.append(1/distance)
+        temperature_level_distance.append(distance)
         if (distance < being.best_distance):
             being.set_best_route
             being.best_distance = distance
+    return temperature_level_solutions,temperature_level_distance
         
         
-def GA_implemented(data_model = None,movement_percentage = 0.15, worse_solutions = 0.05, ro = 1,
-                   beta = 0.8, sigma = 0.15, cooling_constant = True):
+def SA_implemented(data_model = None,movement_percentage = 0.15, worse_solutions = 0.05, rho = 1,
+                   beta = 0.8, reduction_number = 10,cooling_is_constant=True,delta=0.1):
   
     SA_Being.reset_ids()
     # Define the number of cities 
@@ -116,27 +127,34 @@ def GA_implemented(data_model = None,movement_percentage = 0.15, worse_solutions
 
     # Calculate the distance matrix between all pairs of cities
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
-    
-
-
-    first_route = SA_Being(create_route(num_cities), [0,0] , 0, 0)
+    initial_transitions = num_cities
+    first_route = create_route(num_cities)
     first_distance = route_distance(first_route, distance_matrix)
-
+    solution_value = 1/first_distance
+    initial_temperature = (worse_solutions/-(np.log(movement_percentage)))*solution_value
+    solution = SA_Being(first_route,first_route,initial_temperature,first_distance,first_distance,initial_transitions)
     progress = []
+    Tk_solution_list = []
+    Tk_list = []
+    for x in range(reduction_number):
+        Tk_list = neighborhood(solution,initial_transitions,distance_matrix) 
+        Tk_solution_list = Tk_list[0]
+        progress.extend(Tk_list[1])
+        if (cooling_is_constant==False):
+            solution.temperature = cooling(solution.temperature,Tk_solution_list[x],delta)
+        else:
+            solution.temperature = beta*solution.temperature
+        solution.transitions = rho*solution.transitions
 
-    print("Initial distance: " + str(first_distance))
-
-    
-
-    progress.append(SA_Being.best_distance)
-
-    return (progress, SA_Being.best_route,  SA_Being.best_distance)
+    #first_route = SA_Being(create_route(num_cities), [0,0] , 0, 0)
+    #print("Initial distance: " + str(first_distance))
+    return (progress, solution.best_route,  solution.best_distance)
 
 
 if __name__ == "__main__":
     points = generate_form_points(10, "square")
     data_model = create_data_model(points)
-    solution = GA_implemented(data_model,num_generations=30)
+    solution = SA_implemented(data_model,num_generations=30)
     print_route(solution[1])
     plot_locations_with_connections(data_model["locations"], solution[1])
     input("Press Enter to exit...\n")

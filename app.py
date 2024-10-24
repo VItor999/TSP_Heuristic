@@ -283,7 +283,7 @@ execute_tab = html.Div(
                                         dcc.Input(
                                             id="mutation-rate",
                                             type="number",
-                                            value=0.01,
+                                            value=0.075,
                                             step=0.005,
                                             style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                         ),

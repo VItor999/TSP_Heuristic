@@ -54,3 +54,11 @@ class SA_Being:
 
     def set_best_route(self,best_route):
         self.best_route = best_route
+
+
+    @staticmethod
+    def reset_ids():
+        """
+        Resets the static ID counter to 0.
+        """
+        SA_Being.static_ID = 0    
