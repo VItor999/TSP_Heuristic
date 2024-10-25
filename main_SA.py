@@ -48,8 +48,8 @@ if __name__ == "__main__":
     plot_locations_with_connections(solution_benchmark[3]["locations"], route, "Solution found using benchmark")
     
     print("################# Custom SA Solution #################")
-    solution_SA = SA_implemented(data_model,movement_percentage = 0.15, worse_solutions = 0.05, rho = 1,
-                   beta = 0.8, reduction_number = 10,cooling_is_constant=True,delta=0.1)
+    solution_SA = SA_implemented(data_model,movement_percentage = 0.20, worse_solutions = 0.05, rho = 5,
+                   beta = 0.6, reduction_number = 100,cooling_is_constant=True,delta=0.1)
     print(f"Distance: {solution_SA[2]:.2f}  m\n")
     print_route(solution_SA[1])
     plot_locations_with_connections(data_model["locations"], solution_SA[1], "Solution found using custom SA")

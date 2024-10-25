@@ -16,7 +16,27 @@ def create_route(num_cities):
     :rtype: list[int]
     '''
     route = list(range(num_cities))
-    random.shuffle(route)
+    #random.shuffle(route)
+    #first = route[0]
+    #route.append(first)
+    return route
+
+
+#def first_route(data_model):
+
+
+def nearest_neighbor_route(distance_matrix):
+    num_cities = len(distance_matrix)
+    start_city = random.randint(0, num_cities - 1)
+    route = [start_city]
+    unvisited = set(range(num_cities)) - {start_city}
+
+    while unvisited:
+        current_city = route[-1]
+        next_city = min(unvisited, key=lambda city: distance_matrix[current_city][city])
+        route.append(next_city)
+        unvisited.remove(next_city)
+
     return route
 
 def route_distance(route, distance_matrix):
@@ -45,12 +65,16 @@ def swap_neighbor(route):
     city1 = random.randint(0, num_cities - 1)
     city2 = random.randint(0, num_cities - 1)
     route[city1], route[city2] = route[city2], route[city1]
+    #first = route[0]
+    #route[-1] = first
     return route
 
 # Inversion Neighbor
 def inversion_neighbor(route):
     start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
     route[start:end] = route[start:end][::-1]
+    #first = route[0]
+    #route[-1] = first
     return route
 
 # Scramble Neighbor
@@ -71,18 +95,31 @@ def displacement_neighbor(route):
     route[insert_at:insert_at] = segment
     return route
 
-def cooling(temperature,sigma,delta):
+def cooling(temperature,sigma,Lambda):
+    
     standard_dev = statistics.pstdev(sigma)
-    new_temperature = temperature/(1+(np.log(1+delta)*temperature)/(3*standard_dev))
+    
+    if(standard_dev!=0):
+        denominator = math.e**((Lambda*temperature)/standard_dev)
+        new_temperature = temperature/denominator
+    else:
+        new_temperature = 0.75*temperature
+    
+    #new_temperature = temperature/(1+(np.log(1+delta)*temperature)/(3*standard_dev))
     return new_temperature
 
+
+#neighbor_functions = [
+#                swap_neighbor,
+#               inversion_neighbor,
+#                scramble_neighbor,
+#                displacement_neighbor,
+#            ]
 
 def neighbor(route):
     neighbor_functions = [
                 swap_neighbor,
-                inversion_neighbor,
-                scramble_neighbor,
-                displacement_neighbor,
+                inversion_neighbor
             ]
     neighbor_func = random.choice(neighbor_functions)
     neighbor_route = neighbor_func(route)
@@ -93,12 +130,16 @@ def neighborhood(being, neighborhood_size, distance_matrix):
     route = being.current_route
     temperature_level_solutions = []
     temperature_level_distance = []
+   # i = 0
+    print(distance)
     for j in range(neighborhood_size):
         neighbor_route = neighbor(route)
         neighbor_distance = route_distance(neighbor_route,distance_matrix)
         if (neighbor_distance < distance):
             being.set_current_route(neighbor_route)
             being.distance = neighbor_distance
+            #i = i+1
+            #print(i)
         else:
             compare = random.uniform(0, 1)
             temp_function = (distance-neighbor_distance)/being.temperature
@@ -106,12 +147,15 @@ def neighborhood(being, neighborhood_size, distance_matrix):
                 being.set_current_route(neighbor_route)
                 being.distance = neighbor_distance
         distance = being.distance
-        temperature_level_solutions.append(1/distance)
+        
+            
+        
+        #temperature_level_solutions.append(1/distance)
         temperature_level_distance.append(distance)
         if (distance < being.best_distance):
             being.set_best_route
             being.best_distance = distance
-    return temperature_level_solutions,temperature_level_distance
+    return temperature_level_solutions,temperature_level_distance,being
         
         
 def SA_implemented(data_model = None,movement_percentage = 0.15, worse_solutions = 0.05, rho = 1,
@@ -127,9 +171,11 @@ def SA_implemented(data_model = None,movement_percentage = 0.15, worse_solutions
 
     # Calculate the distance matrix between all pairs of cities
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
-    initial_transitions = num_cities
-    first_route = create_route(num_cities)
+    initial_transitions = 100*num_cities
+    first_route = nearest_neighbor_route(distance_matrix)
+    print_route(first_route)
     first_distance = route_distance(first_route, distance_matrix)
+    print(first_distance)
     solution_value = 1/first_distance
     initial_temperature = (worse_solutions/-(np.log(movement_percentage)))*solution_value
     solution = SA_Being(first_route,first_route,initial_temperature,first_distance,first_distance,initial_transitions)
@@ -141,7 +187,7 @@ def SA_implemented(data_model = None,movement_percentage = 0.15, worse_solutions
         Tk_solution_list = Tk_list[0]
         progress.extend(Tk_list[1])
         if (cooling_is_constant==False):
-            solution.temperature = cooling(solution.temperature,Tk_solution_list[x],delta)
+            solution.temperature = cooling(solution.temperature,Tk_solution_list,delta)
         else:
             solution.temperature = beta*solution.temperature
         solution.transitions = rho*solution.transitions
