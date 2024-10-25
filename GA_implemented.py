@@ -246,7 +246,7 @@ def mutate(being, mutation_rate=0.01):
                 inversion_mutation,
                 scramble_mutation,
                 ##insertion_mutation,
-                displacement_mutation,
+                #displacement_mutation,
             ]
             mutation_func = random.choice(mutation_functions)
             route = mutation_func(route)
