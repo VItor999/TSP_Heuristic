@@ -29,9 +29,9 @@ def nearest_neighbor_init(distance_matrix):
 # Adaptive Cooling Schedule: Cools down faster if no improvement
 def adaptive_cooling_schedule(temperature, improvement_count):
     if improvement_count == 0:
-        return temperature * 0.99  # Cool down faster if no improvement
+        return temperature * 0.97  # Cool down faster if no improvement
     else:
-        return temperature * 0.95  # Slow down cooling if improvement happens
+        return temperature * 0.97  # Slow down cooling if improvement happens
 
 # Restart Solution: Randomly shuffle the current solution as a restart mechanism
 def restart_solution(current_solution):
@@ -56,15 +56,24 @@ def inversion_neighbor(route):
     #route[-1] = first
     return route
 
+# Scramble Neighbor
+def scramble_neighbor(route):
+    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
+    subset = route[start:end]
+    random.shuffle(subset)
+    route[start:end] = subset
+    return route
+
 def neighbor(route , temperature, mutation_temp):
     neighbor_functions = [
                 swap_neighbor,
-                inversion_neighbor
+                inversion_neighbor,
+                scramble_neighbor
             ]
     if(temperature <= mutation_temp ):
         neighbor_func = swap_neighbor
     else:
-        neighbor_func = inversion_neighbor
+        neighbor_func = random.choice(neighbor_functions)
     neighbor_route = neighbor_func(route)
     return neighbor_route
 

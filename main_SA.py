@@ -47,7 +47,7 @@ if __name__ == "__main__":
     
     print("################# Custom SA Solution #################")
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
-    initial_temperature = 100000
+    initial_temperature = 10000000
     cooling_rate = 1
     min_temperature = 1
     best_route, best_distance = simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_temperature, 20)
