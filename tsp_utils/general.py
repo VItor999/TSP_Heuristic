@@ -313,6 +313,25 @@ def generate_random_points(num_points = 20):
     points = [(random.randint(0, 1000), random.randint(0, 1000)) for _ in range(num_points)]
     return points
             
+def route_distance(route, distance_matix):
+    '''
+    _summary_
+
+    :param route: Tour; route to have total distance calculated
+    :type route: list[int]
+    :param distance_matix: Matrix with the distance form point to point
+    :type distance_matix: dict
+    :return: total distance of a route
+    :rtype: float
+    '''
+    
+    distance = 0.0
+    num_cities = len(route)
+    for i in range(num_cities):
+        from_city = route[i]
+        to_city = route[(i + 1) % num_cities]
+        distance += distance_matix[from_city][to_city]
+    return distance
             
 if __name__ == "__main__":
     # Generate hexagon points

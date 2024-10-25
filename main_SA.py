@@ -1,4 +1,4 @@
-from SA_implemented import SA_implemented
+from SA_implemented import simulated_annealing
 from benchmark import benchmark, print_solution , find_route
 from tsp_utils.general import *
 import argparse  
@@ -12,17 +12,15 @@ import argparse
 
 if __name__ == "__main__":
     # Initialize the argument parser
-    parser = argparse.ArgumentParser(description='Benchmark X Simulated Annealing test')
+    parser = argparse.ArgumentParser(description='Benchmark X Genetic Algorithm test')
 
     # Add arguments for each parameter
     parser.add_argument('--num_cities', type=int, default=20, help='Number of cities')
-    parser.add_argument('--movement_percentage', type=float, default=0.15, help='mu value')
-    parser.add_argument('--worse_solutions', type=float, default=0.05, help='phi value')
-    parser.add_argument('--rho', type=float, default=1.0, help='rho value')
-    parser.add_argument('--beta', type=float, default=0.8, help='beta value')
-    parser.add_argument('--reduction_number', type=int, default=20, help='How many stages of temperature')
-    parser.add_argument('--cooling_is_constant', type=bool, default=True, help='Define cooling function')
-    parser.add_argument('--delta', type=float, default=0.1, help='delta value')
+    parser.add_argument('--population_size', type=int, default=100, help='Population size')
+    parser.add_argument('--num_generations', type=int, default=100, help='Number of generations')
+    parser.add_argument('--mutation_rate', type=float, default=0.01, help='Mutation rate (0.0 - 1.0)')
+    parser.add_argument('--tournament_size', type=int, default=5, help='Tournament size')
+    parser.add_argument('--elite_size', type=int, default=5, help='Elite size')
     parser.add_argument('--shape', choices=['square', 'circle', 'hexagon', 'triangle'], 
                         default='square', help='Shape type (square, circle, hexagon, triangle)')
     parser.add_argument('--random', action='store_true', help='Enable random behavior (default is disabled)')
@@ -48,9 +46,12 @@ if __name__ == "__main__":
     plot_locations_with_connections(solution_benchmark[3]["locations"], route, "Solution found using benchmark")
     
     print("################# Custom SA Solution #################")
-    solution_SA = SA_implemented(data_model,movement_percentage = 0.20, worse_solutions = 0.05, rho = 5,
-                   beta = 0.6, reduction_number = 100,cooling_is_constant=True,delta=0.1)
-    print(f"Distance: {solution_SA[2]:.2f}  m\n")
-    print_route(solution_SA[1])
-    plot_locations_with_connections(data_model["locations"], solution_SA[1], "Solution found using custom SA")
+    distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
+    initial_temperature = 100000
+    cooling_rate = 1
+    min_temperature = 1
+    best_route, best_distance = simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_temperature, 20)
+    print(f"Distance: {best_distance:.2f}  m\n")
+    print_route(best_route)
+    plot_locations_with_connections(data_model["locations"], best_route, "Solution found using custom SA")
     input("Press Enter to exit...\n")

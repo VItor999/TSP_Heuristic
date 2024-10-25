@@ -1,27 +1,40 @@
 from tsp_utils.general import *
 from tsp_utils.Being import Being
+from tsp_utils.mutation import *
 
-#TODO List:
-#  - MUST: Create class for each solution/being in the population. 
 #  - MUST: Fill this being data accordingly 
-#  - MUST: Make some more sense of the code implement, somehow I think the population is getting smaller? 
 #  - EXTRA: Try to make the algorithm better. Right now is working "ok"
 
+def nearest_neighbor_route(start_city, distance_matrix):
+    num_cities = len(distance_matrix)
+    unvisited = set(range(num_cities))
+    route = [start_city]
+    unvisited.remove(start_city)
+    current_city = start_city
 
-def create_route(num_cities):
-    '''
-    Creates a random tour (route) of the cities.
+    while unvisited:
+        next_city = min(unvisited, key=lambda city: distance_matrix[current_city][city])
+        route.append(next_city)
+        unvisited.remove(next_city)
+        current_city = next_city
 
-    :param num_cities: number of cities to visit
-    :type num_cities: int 
-    :return: list with a random tour of the cities 
-    :rtype: list[int]
-    '''
-    route = list(range(num_cities))
-    random.shuffle(route)
     return route
 
-def initial_population(num_cities, population_size):
+def greedy_route(distance_matrix):
+    num_cities = len(distance_matrix)
+    start_city = random.randint(0, num_cities - 1)
+    route = [start_city]
+    unvisited = set(range(num_cities)) - {start_city}
+
+    while unvisited:
+        current_city = route[-1]
+        next_city = min(unvisited, key=lambda city: distance_matrix[current_city][city])
+        route.append(next_city)
+        unvisited.remove(next_city)
+
+    return route
+
+def initial_population(num_cities, population_size, distance_m):
     '''
     Generates the initial population of routes.
 
@@ -37,6 +50,31 @@ def initial_population(num_cities, population_size):
         b = Being(create_route(num_cities), [0,0] , 0, 0)
         population.append(b)
     return population
+
+#def initial_population(num_cities, population_size, distance_matrix):
+#    population = []
+#    for _ in range(population_size // 20):
+#        population.append(Being(greedy_route(distance_matrix), [0, 0], 0, 0))
+#
+#    for _ in range(population_size // 2, population_size):
+#        population.append(Being(create_route(num_cities), [0, 0], 0, 0))
+#    
+#    return population
+
+
+def create_route(num_cities):
+    '''
+    Creates a random tour (route) of the cities.
+
+    :param num_cities: number of cities to visit
+    :type num_cities: int 
+    :return: list with a random tour of the cities 
+    :rtype: list[int]
+    '''
+    route = list(range(num_cities))
+    random.shuffle(route)
+    return route
+
 
 def route_distance(route, distance_matix):
     '''
@@ -193,44 +231,7 @@ def breed_population(mating_pool, elite_size = 3, gen = 0):
         invalid_new_child = True
     return children
 
-# Swap Mutation
-def swap_mutation(route):
-    num_cities = len(route)
-    city1 = random.randint(0, num_cities - 1)
-    city2 = random.randint(0, num_cities - 1)
-    route[city1], route[city2] = route[city2], route[city1]
-    return route
 
-# Inversion Mutation
-def inversion_mutation(route):
-    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
-    route[start:end] = route[start:end][::-1]
-    return route
-
-# Scramble Mutation
-def scramble_mutation(route):
-    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
-    subset = route[start:end]
-    random.shuffle(subset)
-    route[start:end] = subset
-    return route
-
-# Insertion Mutation
-def insertion_mutation(route):
-    city_index = random.randint(0, len(route)-1)
-    city = route.pop(city_index)
-    insert_at = random.randint(0, len(route)-1)
-    route.insert(insert_at, city)
-    return route
-
-# Displacement Mutation
-def displacement_mutation(route):
-    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
-    segment = route[start:end]
-    del route[start:end]
-    insert_at = random.randint(0, len(route)-1)
-    route[insert_at:insert_at] = segment
-    return route
 
 
 # Randomly perform one mutation
@@ -341,8 +342,8 @@ def GA_implemented(data_model = None,population_size = 100, num_generations = 10
 
     # Calculate the distance matrix between all pairs of cities
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
-    
-    pop = initial_population(num_cities, population_size)
+    #pop = initial_population_nearest_neighbor(num_cities, population_size, distance_matrix)
+    pop = initial_population(num_cities, population_size,distance_matrix)
     progress = []
 
     print("Initial distance: " + str(1 / rank_routes(pop, distance_matrix)[0].fitness))
@@ -368,4 +369,3 @@ if __name__ == "__main__":
     solution = GA_implemented(data_model,num_generations=30)
     print_route(solution[1])
     plot_locations_with_connections(data_model["locations"], solution[1])
-    input("Press Enter to exit...\n")
