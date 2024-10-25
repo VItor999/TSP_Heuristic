@@ -646,4 +646,4 @@ def display_statistics(data):
         return 'No data available.'
 # Run app
 if __name__ == "__main__":
-    app.run_server(debug=False)
+    app.run_server(debug=False, port=12345)
