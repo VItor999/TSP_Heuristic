@@ -39,10 +39,61 @@ def restart_solution(current_solution):
     random.shuffle(new_solution)
     return new_solution
 
+def swap_neighbor(route):
+    num_cities = len(route)
+    city1 = random.randint(0, num_cities - 1)
+    city2 = random.randint(0, num_cities - 1)
+    route[city1], route[city2] = route[city2], route[city1]
+    #first = route[0]
+    #route[-1] = first
+    return route
+
+# Inversion Neighbor
+def inversion_neighbor(route):
+    start, end = sorted([random.randint(0, len(route)-1) for _ in range(2)])
+    route[start:end] = route[start:end][::-1]
+    #first = route[0]
+    #route[-1] = first
+    return route
+
+def neighbor(route , temperature, mutation_temp):
+    neighbor_functions = [
+                swap_neighbor,
+                inversion_neighbor
+            ]
+    if(temperature <= mutation_temp ):
+        neighbor_func = swap_neighbor
+    else:
+        neighbor_func = inversion_neighbor
+    neighbor_route = neighbor_func(route)
+    return neighbor_route
+
+import random
+def create_route(num_cities):
+    '''
+    Creates a random tour (route) of the cities.
+
+    :param num_cities: number of cities to visit
+    :type num_cities: int 
+    :return: list with a random tour of the cities 
+    :rtype: list[int]
+    '''
+    route = list(range(num_cities))
+    random.shuffle(route)
+    #first = route[0]
+    #route.append(first)
+    return route
+
+
 # Simulated Annealing with 2-opt and Nearest Neighbor Initialization
-def simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_temperature, restart_threshold):
+def simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_temperature, restart_threshold, neighborhood_size = 100, initial_route = None, num_cities = 20, mutation_temp = 1000):
     # Initialize with the Nearest Neighbor solution
-    current_solution = nearest_neighbor_init(distance_matrix)
+    current_solution = []
+    if (initial_route != None):
+        current_solution = initial_route
+    else:
+        #current_solution = create_route(num_cities)
+        current_solution = nearest_neighbor_init(distance_matrix)
     current_distance = route_distance(current_solution,distance_matrix)
 
     # Best solution found
@@ -56,25 +107,26 @@ def simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_
 
     while temperature > min_temperature:
         # Generate a neighboring solution using 2-opt move
-        new_solution = two_opt(current_solution)
-        new_distance = route_distance(new_solution,distance_matrix)
+        for j in range(neighborhood_size):
+            new_solution = neighbor(current_solution, temperature, mutation_temp)
+            new_distance = route_distance(new_solution,distance_matrix)
 
-        # Calculate the change in distance
-        delta_distance = new_distance - current_distance
+            # Calculate the change in distance
+            delta_distance = new_distance - current_distance
 
-        # Accept the new solution if it's better or based on a probability depending on temperature
-        if delta_distance < 0 or random.random() < math.exp(-delta_distance / temperature):
-            current_solution = new_solution
-            current_distance = new_distance
-            improvement_count += 1
-            no_improvement_iterations = 0  # Reset improvement counter if an improvement is found
+            # Accept the new solution if it's better or based on a probability depending on temperature
+            if delta_distance < 0 or random.random() < math.exp(-delta_distance / temperature):
+                current_solution = new_solution
+                current_distance = new_distance
+                improvement_count += 1
+                no_improvement_iterations = 0  # Reset improvement counter if an improvement is found
 
-            # Update the best solution found
-            if current_distance < best_distance:
-                best_solution = current_solution[:]
-                best_distance = current_distance
-        else:
-            no_improvement_iterations += 1
+                # Update the best solution found
+                if current_distance < best_distance:
+                    best_solution = current_solution[:]
+                    best_distance = current_distance
+            else:
+                no_improvement_iterations += 1
 
         # Adaptive cooling schedule
         temperature = adaptive_cooling_schedule(temperature, improvement_count)
@@ -83,7 +135,7 @@ def simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_
         # If stuck for too long, restart the search
         if no_improvement_iterations > restart_threshold:
             current_solution = restart_solution(current_solution)
-            current_distance = compute_euclidean_distance_matrix(distance_matrix,current_solution)
+            current_distance = route_distance(current_solution,distance_matrix)
             no_improvement_iterations = 0  # Reset the counter after restarting
 
     best_solution.append(best_solution[0])
@@ -94,10 +146,10 @@ if __name__ == "__main__":
     points = generate_random_points(20)
     data_model = create_data_model(points)
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
-    initial_temperature = 10000000
+    initial_temperature = 100000
     cooling_rate = 1
     min_temperature = 1
-    best_route, best_distance = simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_temperature, 10)
+    best_route, best_distance = simulated_annealing(distance_matrix, initial_temperature, cooling_rate, min_temperature, 10, mutation_temp= 0.5*initial_temperature)
     best_route.append(best_route[0])
     print(f"Best route: {best_route}")
     print(f"Best distance: {best_distance}")
