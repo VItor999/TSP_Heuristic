@@ -161,7 +161,7 @@ def parse_input(filename = "teste1.txt"):
     x_values = list(map(int, lines[0].strip().split()))
     y_values = list(map(int, lines[1].strip().split()))
     
-    if(x_values != y_values):
+    if(len(x_values) != len(y_values)):
         raise ValueError("Invalid data set")
     # Pair X and Y values into tuples
     locations = list(zip(x_values, y_values))
