@@ -227,7 +227,7 @@ def compute_euclidean_distance_matrix(locations, print_matrix = False):
                 distances[from_counter][to_counter] = 0
             else:
                 # Euclidean distance
-                distances[from_counter][to_counter] = int(
+                distances[from_counter][to_counter] = (
                     math.hypot((from_node[0] - to_node[0]), (from_node[1] - to_node[1]))
                 )
     if (print_matrix):
