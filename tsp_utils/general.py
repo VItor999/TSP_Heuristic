@@ -1,6 +1,7 @@
 import math
 import random
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D 
 
 def create_data_model(locations = None):
     """Stores the data for the problem."""
@@ -143,7 +144,7 @@ def generate_form_points(num_points, shape='square'):
                 points.append((x, y))
     return points
 
-
+#ok 3D
 def parse_input(filename = "teste1.txt"):
     '''
     Reads X and Y coordinates from a file and returns a list of (x, y) tuples. The file must contains the X and Y coordinates in deferent lines
@@ -157,68 +158,32 @@ def parse_input(filename = "teste1.txt"):
     with open(filename, 'r') as file:
         lines = file.readlines()
 
+
     # Strip any extra spaces or newline characters
     x_values = list(map(int, lines[0].strip().split()))
     y_values = list(map(int, lines[1].strip().split()))
-    
-    if(len(x_values) != len(y_values)):
-        raise ValueError("Invalid data set")
-    # Pair X and Y values into tuples
-    locations = list(zip(x_values, y_values))
+    try:
+        z_values = list(map(int, lines[2].strip().split()))
+        if(len(x_values) != len(y_values) != len(z_values)):
+            raise ValueError("Invalid data set")
+        locations = list(zip(x_values, y_values, z_values))
+    except:
+        if(len(x_values) != len(y_values)):
+            raise ValueError("Invalid data set")
+        locations = list(zip(x_values, y_values))
+   
 
     return locations
-    
 
-def plot_locations_with_connections(locations, connections, title = "Empty Title"):
-    '''
-    This function will generate the graph of the calculated route
+def compute_euclidean_distance_matrix(locations, print_matrix=False):
+    """
+    Computes the distance matrix for 2D or 3D points.
 
-    :param locations: list of tuples will the locations off all the points of the route 
-    :type locations: list[tuple(int, int)]
-    :param connections: list with the connections between points
-    :type connections: list[int]
-    :param title: title of th graph, default to "Empty title"
-    :type title: str
-    '''
-    x_coords, y_coords = zip(*locations)
-    
-    # Plot the locations
-    plt.figure(figsize=(8, 6))
-    plt.scatter(x_coords, y_coords, c="blue", marker="o", s=100)
-    
-    # Annotate each point with its index
-    for i, (x, y) in enumerate(locations):
-        plt.text(x, y, f'{i}', fontsize=12, ha='right')
-
-    # Draw the connections
-    for i in range(len(connections) - 1):
-        start_index = connections[i]
-        end_index = connections[i + 1]
-        plt.plot(
-            [locations[start_index][0], locations[end_index][0]], 
-            [locations[start_index][1], locations[end_index][1]], 
-            "r-"
-        )
-
-    plt.xlabel("X Coordinates")
-    plt.ylabel("Y Coordinates")
-    plt.title(title)
-    plt.grid(True)
-    plt.show(block=False)
-    
-
-def compute_euclidean_distance_matrix(locations, print_matrix = False):
-    '''
-    Will return the distance matrix for a set of locations
-
-    :param locations: X and Y locations of a ciy
-    :type locations: list[tuple(x,y)]
-    :param print_matrix: boolean to print the calculated matrix, defaults to False
-    :type print_matrix: bool, optional
-    :return: distance matrix 
-    :rtype: dict
-    '''
-    
+    :param locations: List of points as (x, y) or (x, y, z) tuples.
+    :param print_matrix: Whether to print the distance matrix.
+    :return: Distance matrix as a dictionary of dictionaries.
+    """
+    dimensions = len(locations[0])
     distances = {}
     for from_counter, from_node in enumerate(locations):
         distances[from_counter] = {}
@@ -226,14 +191,94 @@ def compute_euclidean_distance_matrix(locations, print_matrix = False):
             if from_counter == to_counter:
                 distances[from_counter][to_counter] = 0
             else:
-                # Euclidean distance
-                distances[from_counter][to_counter] = (
-                    math.hypot((from_node[0] - to_node[0]), (from_node[1] - to_node[1]))
-                )
-    if (print_matrix):
+                if dimensions == 2:  # 2D
+                    distances[from_counter][to_counter] = math.sqrt(
+                        (from_node[0] - to_node[0])**2 +
+                        (from_node[1] - to_node[1])**2
+                    )
+                elif dimensions == 3:  # 3D
+                    distances[from_counter][to_counter] = math.sqrt(
+                        (from_node[0] - to_node[0])**2 +
+                        (from_node[1] - to_node[1])**2 +
+                        (from_node[2] - to_node[2])**2
+                    )
+    if print_matrix:
         print_matrix_form(distances)
     return distances
 
+#ok 3D    
+def plot_locations_with_connections(locations, connections, title="Empty Title"):
+    """
+    This function generates the graph of the calculated route in 2D or 3D.
+
+    :param locations: List of tuples with the coordinates of all points on the route. Can be (x, y) or (x, y, z).
+    :type locations: list[tuple]
+    :param connections: List with the connections between points.
+    :type connections: list[int]
+    :param title: Title of the graph, defaults to "Empty Title".
+    :type title: str
+    """
+    dimensions = len(locations[0])  # Detect if points are 2D or 3D
+    
+    if dimensions == 2:  # 2D Plot
+        x_coords, y_coords = zip(*locations)
+        plt.figure(figsize=(8, 6))
+        plt.scatter(x_coords, y_coords, c="blue", marker="o", s=100)
+        
+        # Annotate each point with its index
+        for i, (x, y) in enumerate(locations):
+            plt.text(x, y, f'{i}', fontsize=12, ha='right')
+        
+        # Draw the connections
+        for i in range(len(connections) - 1):
+            start_index = connections[i]
+            end_index = connections[i + 1]
+            plt.plot(
+                [locations[start_index][0], locations[end_index][0]],
+                [locations[start_index][1], locations[end_index][1]],
+                "r-"
+            )
+        
+        # Set labels and title
+        plt.xlabel("X Coordinates")
+        plt.ylabel("Y Coordinates")
+        plt.title(title)
+        plt.grid(True)
+        plt.show()
+    
+    elif dimensions == 3:  # 3D Plot
+        x_coords, y_coords, z_coords = zip(*locations)
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111, projection='3d')
+        
+        ax.scatter(x_coords, y_coords, z_coords, c="blue", marker="o", s=100)
+        
+        # Annotate each point with its index
+        for i, (x, y, z) in enumerate(locations):
+            ax.text(x, y, z, f'{i}', fontsize=10, ha='right')
+        
+        # Draw the connections
+        for i in range(len(connections) - 1):
+            start_index = connections[i]
+            end_index = connections[i + 1]
+            ax.plot(
+                [locations[start_index][0], locations[end_index][0]],
+                [locations[start_index][1], locations[end_index][1]],
+                [locations[start_index][2], locations[end_index][2]],
+                "r-"
+            )
+        
+        # Set labels and title
+        ax.set_xlabel("X Coordinates")
+        ax.set_ylabel("Y Coordinates")
+        ax.set_zlabel("Z Coordinates")
+        ax.set_title(title)
+        plt.grid(True)
+        plt.show()
+    else:
+        raise ValueError("Locations must be 2D or 3D points.")
+
+# no neeed for 3D
 def print_matrix_form(matrix):
     '''
     Prints in a human readable format the distance matrix 
@@ -256,16 +301,6 @@ def print_matrix_form(matrix):
             print(f"{row[to_node]:5}", end=" ")  # Each distance
         print()  # Newline after each row
 
-    """Calculates the total distance for a given route using the provided distance matrix.
-    
-    Args:
-        distance_matrix (dict): The distance matrix as a dictionary of dictionaries.
-        route (List[int]): The route represented as a list of node indices (e.g., [0, 1, 3, 0]).
-        
-    Returns:
-        int: Total distance of the route.
-    """
-
 def calculate_route_distance(distance_matrix, route):
     '''
     Calculates the total distance for a given route using the provided distance matrix.
@@ -287,7 +322,7 @@ def calculate_route_distance(distance_matrix, route):
 
     return total_distance
 
-
+# no neeed for 3D
 def print_route(route):
     '''
     Prints a route 
@@ -301,18 +336,27 @@ def print_route(route):
         else:
             print(f"{route[index]:2d}")
             
-def generate_random_points(num_points = 20):
-    '''
-    Generates random points with range 0 - 1000
+def generate_random_points(num_points=20, dim=2):
+    """
+    Generates random points in 2D or 3D space with coordinates in the range 0 - 1000.
 
-    :param num_points: number of cities to generate, defaults to 20
+    :param num_points: Number of points to generate, defaults to 20.
     :type num_points: int, optional
-    :return: list with tuples of the points generated 
-    :rtype: list[tuple(int, int)]
-    '''
-    points = [(random.randint(0, 1000), random.randint(0, 1000)) for _ in range(num_points)]
+    :param dim: Number of dimensions for the points (2 or 3), defaults to 2.
+    :type dim: int, optional
+    :return: List of points as tuples of length 2 or 3.
+    :rtype: list[tuple]
+    """
+    if dim not in [2, 3]:
+        raise ValueError("Only 2D and 3D points are supported.")
+    
+    points = [
+        tuple(random.randint(0, 1000) for _ in range(dim)) 
+        for _ in range(num_points)
+    ]
     return points
-            
+
+# no neeed for 3D            
 def route_distance(route, distance_matix):
     '''
     _summary_
