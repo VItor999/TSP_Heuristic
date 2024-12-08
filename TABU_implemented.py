@@ -4,6 +4,23 @@ import math
 from collections import deque
 
 
+def greedy_route(distance_matrix):
+    """Creates a greedy route starting from the first city."""
+    num_cities = len(distance_matrix)
+    unvisited = set(range(num_cities))
+    current_city = 0
+    route = [current_city]
+    unvisited.remove(current_city)
+
+    while unvisited:
+        # Find the closest unvisited city
+        next_city = min(unvisited, key=lambda city: distance_matrix[current_city][city])
+        route.append(next_city)
+        unvisited.remove(next_city)
+        current_city = next_city
+
+    return route
+
 def create_route(num_cities):
     """Creates a random tour (route) of the cities."""
     route = list(range(num_cities))
@@ -48,7 +65,7 @@ def scramble_neighbor(route):
 
 def neighborhood(route, neighborhood_size):
     """Generates a set of neighbors using random mutations."""
-    neighbor_functions = [swap_neighbor, inversion_neighbor, scramble_neighbor]
+    neighbor_functions = [swap_neighbor]
     neighbors = []
     for _ in range(neighborhood_size):
         neighbor_func = random.choice(neighbor_functions)
@@ -79,7 +96,8 @@ def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=2
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
 
     # Create the initial solution
-    current_route = create_route(num_cities)
+    current_route = greedy_route(distance_matrix)
+    #current_route = create_route(num_cities)
     current_distance = route_distance(current_route, distance_matrix)
 
     # Initialize the best solution
@@ -124,9 +142,10 @@ def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=2
 
 
 if __name__ == "__main__":
-    points = generate_random_points(80)
+
+    points = parse_input('ale_20cidades3D.txt')#generate_random_points(20,dim=3)
     data_model = create_data_model(points)
-    solution = tabu_search(data_model, max_iter=50, neighborhood_size=200)
+    solution = tabu_search(data_model, max_iter=100, neighborhood_size=500)
     solution[1].append(solution[1][0])
     print_route(solution[1])
     plot_locations_with_connections(data_model["locations"], solution[1])
