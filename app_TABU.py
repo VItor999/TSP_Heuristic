@@ -19,53 +19,364 @@ log.setLevel(logging.ERROR)
 #  - MUST: Document this code
 #  - EXTRA: Add third tab with the population information per generation 
 
+
+light_theme = {
+    "backgroundColor": "#f9f9f9",  # Light gray background
+    "color": "#000000",  # Black text
+    "headerColor": "#007bff",  # Blue for headers
+    "tabBackgroundColor": "#ffffff",  # White tabs
+    "tabSelectedColor": "#007bff",  # Blue for selected tabs
+    "plotlyTheme": {
+        "layout": {
+            "paper_bgcolor": "#f9f9f9",  # Matches the background color
+            "plot_bgcolor": "#ffffff",  # White plot area
+            "font": {"color": "#000000"},  # Black font
+            "xaxis": {
+                "gridcolor": "#e6e6e6",  # Light grid lines for X-axis
+                "zerolinecolor": "#cccccc",  # Light gray zero line
+            },
+            "yaxis": {
+                "gridcolor": "#e6e6e6",  # Light grid lines for Y-axis
+                "zerolinecolor": "#cccccc",  # Light gray zero line
+            },
+        }
+    },
+}
+
+dark_theme = {
+    "backgroundColor": "#1e1e1e",  # Dark gray background
+    "color": "#ffffff",  # White text
+    "headerColor": "#007bff",  # Blue for headers
+    "tabBackgroundColor": "#333333",  # Dark gray tabs
+    "tabSelectedColor": "#007bff",  # Blue for selected tabs
+    "plotlyTheme": {
+        "layout": {
+            "paper_bgcolor": "#1e1e1e",  # Matches the background color
+            "plot_bgcolor": "#2b2b2b",  # Slightly lighter gray plot area
+            "font": {"color": "#ffffff"},  # White font for text
+            "xaxis": {
+                "gridcolor": "#444444",  # Subtle grid lines for X-axis
+                "zerolinecolor": "#666666",  # Gray zero line
+            },
+            "yaxis": {
+                "gridcolor": "#444444",  # Subtle grid lines for Y-axis
+                "zerolinecolor": "#666666",  # Gray zero line
+            },
+        }
+    },
+}
+
+
 # Create Dash app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__)
+
 
 # App layout
 app.layout = html.Div(
-    style={"backgroundColor": "#1e1e1e", "color": "white", "padding": "20px"},
     children=[
-        html.H1(
-            "Genetic Algorithm Application",
-            style={"textAlign": "center", "color": "white", "marginBottom": "20px"},
-        ),
-        dcc.Tabs(
-            id="tabs",
-            value='main',
+        # Store to keep the theme state
+        dcc.Store(id="theme-store", data="dark"),  # Default to dark theme
+
+        html.Div(
+            id="main-container",
+            style={"padding": "20px"},  # Style will be dynamically updated
             children=[
-                dcc.Tab(label='Simulated Annealig Dashboard', value='main', style={'backgroundColor': '#333', 'color': 'white'},
-                        selected_style={'backgroundColor': '#007bff', 'color': 'white'}),
-                dcc.Tab(label='Statistics', value='statistics', style={'backgroundColor': '#333', 'color': 'white'},
-                        selected_style={'backgroundColor': '#007bff', 'color': 'white'}),
+                html.Div(
+                    style={"display": "flex", "justifyContent": "space-between", "alignItems": "center"},
+                    children=[
+                        html.H1(
+                            "Genetic Algorithm Application",
+                            id="app-title",
+                            style={"textAlign": "center", "marginBottom": "20px", "flex": "1"},
+                        ),
+                        # Theme toggle button
+                        html.Button(
+                            id="color-scheme-toggle",
+                            style={
+                                "backgroundImage": "url('/assets/sun.png')",  # Replace with actual image
+                                "backgroundSize": "contain",
+                                "backgroundRepeat": "no-repeat",
+                                "backgroundPosition": "center",
+                                "backgroundColor": "transparent",
+                                "border": "none",
+                                "width": "50px",
+                                "height": "50px",
+                                "borderRadius": "10px",
+                                "cursor": "pointer",
+                                "margin": "0 20px",
+                            },
+                            title="Toggle Color Scheme",
+                        ),
+                    ],
+                ),
+                dcc.Tabs(
+                    id="tabs",
+                    value="main",
+                    children=[
+                        dcc.Tab(
+                            label="Simulated Annealing Dashboard",
+                            value="main",
+                            style={"backgroundColor": "#333", "color": "white"},
+                            selected_style={"backgroundColor": "#007bff", "color": "white"},
+                        ),
+                        dcc.Tab(
+                            label="Statistics",
+                            value="statistics",
+                            style={"backgroundColor": "#333", "color": "white"},
+                            selected_style={"backgroundColor": "#007bff", "color": "white"},
+                        ),
+                    ],
+                    style={"marginBottom": "20px"},
+                ),
+                html.Div(id="tabs-content", style={"padding": "20px"}),
+                dcc.Store(id='shared-data-store', storage_type='memory')
             ],
-            style={'marginBottom': '20px'}
         ),
-        html.Div(id='tabs-content', style={'backgroundColor': '#1e1e1e', 'padding': '20px'}),
-        dcc.Store(id='shared-data-store', storage_type='memory')
     ]
 )
 
-statatistics_tab_layout =html.Div(
-            style={"backgroundColor": "#333", "padding": "20px", "borderRadius": "10px"},
-            children=[
-                html.H2("Statistics", style={"color": "white", "textAlign": "center", "marginBottom": "20px"}),
-                html.P("Here you can display various statistics related to the Genetic Algorithm runs.", style={"color": "white", "textAlign": "center"}),
-                html.Div(
-                    style={"marginTop": "20px", "display": "flex", "justifyContent": "center", "alignItems": "center"},
-                    children=[
-                        html.Div(
-                            style={"width": "80%", "backgroundColor": "#1e1e1e", "padding": "20px", "borderRadius": "10px"},
-                            children=[
-                                        html.H4('Statistics from Generated Data'),
-                                        html.Div(id='statistics-output')
-                                # You can add more detailed statistics here
-                            ],
-                        )
-                    ],
-                )
-            ]
-        )
+def create_statistics_tab_layout(current_theme):
+    return html.Div(
+        style={
+            "backgroundColor": current_theme["backgroundColor"],
+            "padding": "20px",
+            "borderRadius": "10px",
+        },
+        children=[
+            html.H2(
+                "Statistics",
+                style={
+                    "color": current_theme["color"],
+                    "textAlign": "center",
+                    "marginBottom": "20px",
+                },
+            ),
+            html.P(
+                "Here you can display various statistics related to the Genetic Algorithm runs.",
+                style={
+                    "color": current_theme["color"],
+                    "textAlign": "center",
+                },
+            ),
+            html.Div(
+                style={
+                    "marginTop": "20px",
+                    "display": "flex",
+                    "justifyContent": "center",
+                    "alignItems": "center",
+                },
+                children=[
+                    html.Div(
+                        style={
+                            "width": "80%",
+                            "backgroundColor": current_theme["tabBackgroundColor"],
+                            "padding": "20px",
+                            "borderRadius": "10px",
+                        },
+                        children=[
+                            html.H4(
+                                "Statistics from Generated Data",
+                                style={"color": current_theme["color"]},
+                            ),
+                            html.Div(id="statistics-output"),
+                            # Add more detailed statistics here
+                        ],
+                    )
+                ],
+            ),
+        ],
+    )
+
+def create_execute_tab(current_theme):
+    return html.Div(
+        style={
+            "backgroundColor": current_theme["backgroundColor"],
+            "color": current_theme["color"],
+            "padding": "20px",
+        },
+        children=[
+            html.Div(
+                style={"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "alignItems": "center"},
+                children=[
+                    # Plot 1 with total distance label
+                    html.Div(
+                        children=[
+                            dcc.Graph(id="plot1", style={"width": "100%", "height": "100%"}),  # Ensures square graph
+                            html.Div(
+                                children=[
+                                    html.Label(
+                                        id="total-distance-label-plot1",
+                                        children="Distance: 0 m",
+                                        style={
+                                            "color": current_theme["color"],
+                                            "fontSize": "18px",
+                                            "textAlign": "center",
+                                            "display": "block",
+                                        },
+                                    ),
+                                ],
+                                style={"marginTop": "10px", "textAlign": "center"},
+                            ),
+                        ],
+                        style={
+                            "width": "49%",
+                            "aspectRatio": "1 / 1",
+                            "backgroundColor": current_theme["tabBackgroundColor"],
+                            "padding": "10px",
+                            "borderRadius": "10px",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "alignItems": "center",
+                            "justifyContent": "center",
+                        },
+                    ),
+                    # Plot 2 with total distance label
+                    html.Div(
+                        children=[
+                            dcc.Graph(id="plot2", style={"width": "100%", "height": "100%"}),  # Ensures square graph
+                            html.Div(
+                                children=[
+                                    html.Label(
+                                        id="total-distance-label-plot2",
+                                        children="Distance: 0 m",
+                                        style={
+                                            "color": current_theme["color"],
+                                            "fontSize": "18px",
+                                            "textAlign": "center",
+                                            "display": "block",
+                                        },
+                                    ),
+                                ],
+                                style={"marginTop": "10px", "textAlign": "center"},
+                            ),
+                        ],
+                        style={
+                            "width": "49%",
+                            "aspectRatio": "1 / 1",
+                            "backgroundColor": current_theme["tabBackgroundColor"],
+                            "padding": "10px",
+                            "borderRadius": "10px",
+                            "display": "flex",
+                            "flexDirection": "column",
+                            "alignItems": "center",
+                            "justifyContent": "center",
+                        },
+                    ),
+                ],
+            ),
+            # Scaled content starts here (unchanged)
+            html.Div(
+                style={
+                    "transform": "scale(0.75)",
+                    "transformOrigin": "top left",
+                    "width": "133%",
+                },
+                children=[
+                    html.Div(
+                        style={
+                            "marginTop": "40px",
+                            "padding": "20px",
+                            "backgroundColor": current_theme["tabBackgroundColor"],
+                            "borderRadius": "10px",
+                            "textAlign": "center",
+                        },
+                        children=[
+                            html.Label(
+                                "City Distribution Options:",
+                                style={
+                                    "color": current_theme["color"],
+                                    "fontSize": "22px",
+                                    "fontWeight": "bold",
+                                    "display": "block",
+                                    "marginBottom": "15px",
+                                },
+                            ),
+                            dcc.RadioItems(
+                                id="radio-options",
+                                options=[
+                                    {"label": "Random", "value": "random"},
+                                    {"label": "Square", "value": "square"},
+                                    {"label": "Circle", "value": "circle"},
+                                    {"label": "Triangle", "value": "triangle"},
+                                    {"label": "Hexagon", "value": "hexagon"},
+                                    {"label": "Upload File", "value": "file"},
+                                ],
+                                value="square",
+                                style={"marginBottom": "20px", "color": current_theme["color"]},
+                                labelStyle={"display": "inline-block", "marginRight": "20px", "fontSize": "20px"},
+                                inputStyle={"marginRight": "10px", "transform": "scale(1.8)"},
+                            ),
+                            html.Div(
+                                id="file-upload-div",
+                                children=[
+                                    dcc.Upload(
+                                        id="file-upload",
+                                        children=html.Div(["Drag and Drop or ", html.A("Select a File")]),
+                                        style={
+                                            "width": "50%",
+                                            "height": "60px",
+                                            "lineHeight": "60px",
+                                            "borderWidth": "1px",
+                                            "borderStyle": "dashed",
+                                            "borderRadius": "10px",
+                                            "textAlign": "center",
+                                            "margin": "auto",
+                                            "color": "white",
+                                        },
+                                        multiple=False,
+                                    )
+                                ],
+                                style={"display": "none"},
+                            ),
+                            html.Br(),
+                            html.Label(
+                                "Simulated Annealing Parameters:",
+                                style={
+                                    "color": current_theme["color"],
+                                    "fontSize": "22px",
+                                    "fontWeight": "bold",
+                                    "display": "block",
+                                    "marginBottom": "15px",
+                                },
+                            ),
+                            html.Div(
+                                style={
+                                    "marginTop": "20px",
+                                    "display": "grid",
+                                    "gridTemplateColumns": "repeat(3, 1fr)",
+                                    "gap": "30px",
+                                },
+                                children=[
+                                    # Example of parameter input field
+                                    html.Div(
+                                        children=[
+                                            html.Label(
+                                                "num_cities:",
+                                                style={
+                                                    "color": current_theme["color"],
+                                                    "fontSize": "20px",
+                                                    "marginBottom": "8px",
+                                                },
+                                            ),
+                                            dcc.Input(
+                                                id="num-cities",
+                                                type="number",
+                                                value=20,
+                                                style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                            ),
+                                        ],
+                                        style={"textAlign": "left"},
+                                    ),
+                                    # Add other parameters similarly...
+                                ],
+                            ),
+                        ],
+                    ),
+                ],
+            ),
+        ],
+    )
+
 
 # App layout
 execute_tab = html.Div(
@@ -347,14 +658,92 @@ execute_tab = html.Div(
     ],
 )
 
+@app.callback(
+    Output("tabs-content", "children"),
+    Output("main-container", "style"),
+    Output("app-title", "style"),
+    Output("tabs", "children"),
+    Output("theme-store", "data"),
+    Input("tabs", "value"),
+    Input("color-scheme-toggle", "n_clicks"),
+    State("theme-store", "data"),
+)
+def update_layout(selected_tab, n_clicks, current_theme):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        trigger = None
+    else:
+        trigger = ctx.triggered[0]["prop_id"].split(".")[0]
 
-# Callback to update content based on selected tab
-@app.callback(Output('tabs-content', 'children'), [Input('tabs', 'value')])
-def update_tab_content(tab_name):
-    if tab_name == 'main':
-       return execute_tab
-    elif tab_name == 'statistics':
-        return statatistics_tab_layout
+    # Default theme if no action
+    if not n_clicks:
+        current_theme_data = dark_theme
+        next_theme = "dark"
+    else:
+        # Toggle theme only when the button is clicked
+        if trigger == "color-scheme-toggle":
+            if current_theme == "dark":
+                current_theme_data = light_theme
+                next_theme = "light"
+            else:
+                current_theme_data = dark_theme
+                next_theme = "dark"
+        else:
+            current_theme_data = dark_theme if current_theme == "dark" else light_theme
+            next_theme = current_theme
+
+    # Update the tab content
+    if selected_tab == "main":
+        tab_content = execute_tab
+    elif selected_tab == "statistics":
+        tab_content = create_statistics_tab_layout(current_theme_data)
+    else:
+        tab_content = html.Div(
+            "Default content",
+            style={"color": current_theme_data["color"]},
+        )
+
+    # Update container and title styles
+    container_style = {
+        "backgroundColor": current_theme_data["backgroundColor"],
+        "color": current_theme_data["color"],
+        "padding": "20px",
+    }
+    title_style = {
+        "color": current_theme_data["color"],
+        "textAlign": "center",
+        "marginBottom": "20px",
+        "flex": "1",
+    }
+    tabs_children = [
+        dcc.Tab(
+            label="Simulated Annealing Dashboard",
+            value="main",
+            style={
+                "backgroundColor": current_theme_data["tabBackgroundColor"],
+                "color": current_theme_data["color"],
+            },
+            selected_style={
+                "backgroundColor": current_theme_data["tabSelectedColor"],
+                "color": current_theme_data["color"],
+            },
+        ),
+        dcc.Tab(
+            label="Statistics",
+            value="statistics",
+            style={
+                "backgroundColor": current_theme_data["tabBackgroundColor"],
+                "color": current_theme_data["color"],
+            },
+            selected_style={
+                "backgroundColor": current_theme_data["tabSelectedColor"],
+                "color": current_theme_data["color"],
+            },
+        ),
+    ]
+
+    return tab_content, container_style, title_style, tabs_children, next_theme
+
 
 
 @app.callback(
@@ -451,12 +840,17 @@ def parse_input(contents, filename):
         State("num-cities", "value"),
         State("neighborhood-size", "value"),
         State("restart-threshold", "value"),
-        State("max_tries", "value")
+        State("max_tries", "value"),
+        State("theme-store", "data"),
     ],
 )
 def update_plots(n_clicks, selected_option, uploaded_data, num_cities,
-                 neighborhood_size, restart_threshold, max_tries):
+                 neighborhood_size, restart_threshold, max_tries,theme):
     # Generate or load city data
+    if (theme == "light"):
+        current_theme = light_theme
+    else :
+        current_theme = dark_theme
     if selected_option == "file" and uploaded_data is not None:
         cities = uploaded_data
     elif selected_option == "random":
@@ -491,12 +885,13 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities,
     fig2 = go.Figure()
 
     # Generate Benchmark Plot
-    add_plot_traces(fig1, data_model["locations"], route_bench, is_3d)
+    add_plot_traces(fig1, data_model["locations"], route_bench, is_3d,current_theme)
+    # Generate Benchmark Plot
     fig1.update_layout(
-        title=f"Benchmark (Google OR): {benchmark_dist:5.3} m",
-        plot_bgcolor="#333",
-        paper_bgcolor="#333",
-        font={"color": "white"},
+        title=f"Benchmark (Google OR): {benchmark_dist:5.3f} m",
+        plot_bgcolor=current_theme["plotlyTheme"]["layout"]["plot_bgcolor"],  # Use theme for plot background
+        paper_bgcolor=current_theme["plotlyTheme"]["layout"]["paper_bgcolor"],  # Use theme for paper background
+        font={"color": current_theme["color"]},  # Use theme font color
         xaxis_title="X [m]",
         yaxis_title="Y [m]" if not is_3d else None,
         scene=dict(  # Add scene for 3D plots
@@ -508,15 +903,15 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities,
     )
 
     # Generate Simulated Annealing Plot
-    add_plot_traces(fig2, data_model["locations"], TS_best_route, is_3d)
+    add_plot_traces(fig2, data_model["locations"], TS_best_route, is_3d,current_theme)
     fig2.update_layout(
         title=f"Tabus Search: {TS_best_solution_distance:5.3f} m",
-        plot_bgcolor="#333",
-        paper_bgcolor="#333",
-        font={"color": "white"},
+        plot_bgcolor=current_theme["plotlyTheme"]["layout"]["plot_bgcolor"],  # Use theme for plot background
+        paper_bgcolor=current_theme["plotlyTheme"]["layout"]["paper_bgcolor"],  # Use theme for paper background
+        font={"color": current_theme["color"]},  # Use theme font color
         xaxis_title="X [m]",
         yaxis_title="Y [m]" if not is_3d else None,
-        scene=dict(
+        scene=dict(  # Add scene for 3D plots
             xaxis_title="X [m]",
             yaxis_title="Y [m]",
             zaxis_title="Z [m]",
@@ -527,22 +922,28 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities,
     return fig1, fig2, TS_best_solution, benchmark_distance_label, TS_distance_label
 
 
-def add_plot_traces(fig, locations, route, is_3d):
+def add_plot_traces(fig, locations, route, is_3d, current_theme):
     """
-    Add scatter and line traces to the plot based on the dimensionality.
+    Add scatter and line traces to the plot based on the dimensionality and current theme.
 
     :param fig: Plotly figure object to update.
     :param locations: List of 2D or 3D points.
     :param route: List of route indices.
     :param is_3d: Boolean indicating if the plot is 3D.
+    :param current_theme: The current theme dictionary (light or dark).
     """
+    node_color = current_theme["color"]  # Use theme font color for node labels
+    marker_color = "#007bff" if current_theme["color"] == "#000000" else "#00ccff"  # Blue for light/dark themes
+    line_color = "#ff5733" if current_theme["color"] == "#000000" else "#ffcc33"  # Orange for light/dark themes
+
     if is_3d:
         x_coords, y_coords, z_coords = zip(*locations)
         fig.add_trace(go.Scatter3d(
             x=x_coords, y=y_coords, z=z_coords,
             mode='markers+text',
-            marker=dict(size=5, color='blue'),
+            marker=dict(size=7, color=marker_color),  # Dynamic marker color
             text=[str(i) for i in range(len(locations))],
+            textfont=dict(color=node_color),  # Dynamic text color
             name='Nodes'
         ))
         for i in range(len(route) - 1):
@@ -553,7 +954,7 @@ def add_plot_traces(fig, locations, route, is_3d):
                 y=[locations[start][1], locations[end][1]],
                 z=[locations[start][2], locations[end][2]],
                 mode='lines',
-                line=dict(color='red', width=2),
+                line=dict(color=line_color, width=3),  # Dynamic line color
                 name='Connection'
             ))
     else:
@@ -561,8 +962,9 @@ def add_plot_traces(fig, locations, route, is_3d):
         fig.add_trace(go.Scatter(
             x=x_coords, y=y_coords,
             mode='markers+text',
-            marker=dict(size=5, color='blue'),
+            marker=dict(size=10, color=marker_color),  # Dynamic marker color
             text=[str(i) for i in range(len(locations))],
+            textfont=dict(color=node_color),  # Dynamic text color
             name='Nodes'
         ))
         for i in range(len(route) - 1):
@@ -572,9 +974,10 @@ def add_plot_traces(fig, locations, route, is_3d):
                 x=[locations[start][0], locations[end][0]],
                 y=[locations[start][1], locations[end][1]],
                 mode='lines',
-                line=dict(color='red', width=2),
+                line=dict(color=line_color, width=3),  # Dynamic line color
                 name='Connection'
             ))
+
 
 
 @app.callback(
@@ -608,4 +1011,4 @@ def display_statistics(data):
         return 'No data available.'
 # Run app
 if __name__ == "__main__":
-    app.run_server(debug=False, port=12345)
+    app.run_server(debug=True, port=12345)

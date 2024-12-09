@@ -1,0 +1,15 @@
+.toast {
+    background-color: #333 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+.toast-header {
+    background-color: #444 !important;
+    color: #fff !important;
+    font-weight: bold !important;
+}
+.toast-body {
+    font-size: 14px !important;
+    color: #ddd !important;
+}
