@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 import numpy as np
 import dash_bootstrap_components as dbc  
-from TABU_implemented import tabu_search
+from TS_implemented import tabu_search
 from benchmark import benchmark, find_route
 from tsp_utils.general import *
 import base64
@@ -17,7 +17,6 @@ log.setLevel(logging.ERROR)
 #  - MUST: Clean this code and reorganize it. 
 #  - MUST: Add more features to the statistics tab
 #  - MUST: Document this code
-#  - EXTRA: Add third tab with the population information per generation 
 
 
 light_theme = {
