@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 import numpy as np
 import dash_bootstrap_components as dbc  
-from TS_implemented import tabu_search
+from algorithms.TS_implemented import tabu_search
 from benchmark import benchmark, find_route
 from tsp_utils.general import *
 import base64

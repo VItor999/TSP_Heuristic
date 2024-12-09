@@ -1,4 +1,4 @@
-from SA_implemented import simulated_annealing
+from algorithms.SA_implemented import simulated_annealing
 from benchmark import benchmark, print_solution , find_route
 from tsp_utils.general import *
 import argparse  

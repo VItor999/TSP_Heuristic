@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objs as go
 import numpy as np
 import dash_bootstrap_components as dbc  
-from SA_implemented import simulated_annealing
+from algorithms.SA_implemented import simulated_annealing
 from benchmark import benchmark, find_route
 from tsp_utils.general import *
 import base64

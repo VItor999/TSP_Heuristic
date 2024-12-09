@@ -1,4 +1,4 @@
-from GA_implemented import GA_implemented
+from algorithms.GA_implemented import GA_implemented
 from benchmark import benchmark, print_solution , find_route
 from tsp_utils.general import *
 import argparse  
