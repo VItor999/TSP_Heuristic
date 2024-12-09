@@ -27,6 +27,21 @@ def create_route(num_cities):
     random.shuffle(route)
     return route
 
+def perturb_solution(route):
+    """
+    Applies a perturbation to the given route to diversify the search.
+
+    :param route: The current best route.
+    :type route: list
+    :param num_cities: The total number of cities in the problem.
+    :return: A perturbed route.
+    :rtype: list
+    """
+    
+    perturbed_route =  scramble_neighbor(route)
+
+    return perturbed_route
+
 
 def route_distance(route, distance_matrix):
     """Calculates the total distance of a route."""
@@ -65,7 +80,7 @@ def scramble_neighbor(route):
 
 def neighborhood(route, neighborhood_size):
     """Generates a set of neighbors using random mutations."""
-    neighbor_functions = [swap_neighbor]
+    neighbor_functions = [inversion_neighbor]
     neighbors = []
     for _ in range(neighborhood_size):
         neighbor_func = random.choice(neighbor_functions)
@@ -74,9 +89,9 @@ def neighborhood(route, neighborhood_size):
     return neighbors
 
 
-def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=20):
+def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=20, stagnation_limit=20, stagnation=0):
     """
-    Executes the Tabu Search algorithm.
+    Executes the Tabu Search algorithm with Aspiration Criterion and Diversification.
 
     :param data_model: The problem's data model.
     :type data_model: dict
@@ -86,6 +101,8 @@ def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=2
     :type max_iter: int
     :param neighborhood_size: Number of neighbors to evaluate per iteration.
     :type neighborhood_size: int
+    :param stagnation_limit: Number of iterations without improvement to trigger diversification.
+    :type stagnation_limit: int
     :return: A tuple with progress, the best route, and the best distance.
     :rtype: tuple
     """
@@ -97,7 +114,6 @@ def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=2
 
     # Create the initial solution
     current_route = greedy_route(distance_matrix)
-    #current_route = create_route(num_cities)
     current_distance = route_distance(current_route, distance_matrix)
 
     # Initialize the best solution
@@ -109,6 +125,7 @@ def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=2
 
     # Progress tracker
     progress = []
+    no_improvement_count = 0  # Counter for stagnation
 
     for iteration in range(max_iter):
         # Generate neighbors and evaluate them
@@ -118,9 +135,16 @@ def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=2
         ]
         evaluated_neighbors.sort(key=lambda x: x[1])  # Sort by distance (minimization)
 
-        # Select the best non-tabu neighbor
+        # Select the best neighbor with Aspiration Criterion
         for neighbor, distance in evaluated_neighbors:
-            if neighbor not in tabu_list or distance < best_distance:
+            if neighbor in tabu_list:
+                # Apply Aspiration Criterion
+                if distance < best_distance:
+                    current_route = neighbor
+                    current_distance = distance
+                    break
+            else:
+                # Non-tabu move
                 current_route = neighbor
                 current_distance = distance
                 break
@@ -132,13 +156,24 @@ def tabu_search(data_model=None, tabu_size=10, max_iter=100, neighborhood_size=2
         if current_distance < best_distance:
             best_route = current_route[:]
             best_distance = current_distance
+            no_improvement_count = 0  # Reset stagnation counter
+        else:
+            no_improvement_count += 1
 
         # Record progress
         progress.append(best_distance)
         if iteration % 10 == 0 or iteration == max_iter - 1:
             print(f"Iteration {iteration}: Best Distance = {best_distance:.2f}")
 
+        # Diversification: Check stagnation
+        if (no_improvement_count >= stagnation_limit) and stagnation == 1:
+            print(f"Diversification triggered at iteration {iteration}")
+            current_route = perturb_solution(list(best_route))
+            current_distance = route_distance(current_route, distance_matrix)
+            no_improvement_count = 0  # Reset stagnation counter
+
     return progress, best_route, best_distance
+
 
 
 if __name__ == "__main__":

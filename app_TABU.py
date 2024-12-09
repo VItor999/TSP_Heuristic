@@ -189,11 +189,7 @@ def create_statistics_tab_layout(current_theme):
 
 def create_execute_tab(current_theme):
     return html.Div(
-        style={
-            "backgroundColor": current_theme["backgroundColor"],
-            "color": current_theme["color"],
-            "padding": "20px",
-        },
+        style={"backgroundColor": current_theme["color"], "color": "white", "padding": "20px"},
         children=[
             html.Div(
                 style={"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "alignItems": "center"},
@@ -208,7 +204,7 @@ def create_execute_tab(current_theme):
                                         id="total-distance-label-plot1",
                                         children="Distance: 0 m",
                                         style={
-                                            "color": current_theme["color"],
+                                            "color": "white",
                                             "fontSize": "18px",
                                             "textAlign": "center",
                                             "display": "block",
@@ -220,8 +216,8 @@ def create_execute_tab(current_theme):
                         ],
                         style={
                             "width": "49%",
-                            "aspectRatio": "1 / 1",
-                            "backgroundColor": current_theme["tabBackgroundColor"],
+                            "aspectRatio": "1 / 1",  # Ensures a square aspect ratio
+                            "backgroundColor": "#333",
                             "padding": "10px",
                             "borderRadius": "10px",
                             "display": "flex",
@@ -240,7 +236,7 @@ def create_execute_tab(current_theme):
                                         id="total-distance-label-plot2",
                                         children="Distance: 0 m",
                                         style={
-                                            "color": current_theme["color"],
+                                            "color": "white",
                                             "fontSize": "18px",
                                             "textAlign": "center",
                                             "display": "block",
@@ -252,8 +248,8 @@ def create_execute_tab(current_theme):
                         ],
                         style={
                             "width": "49%",
-                            "aspectRatio": "1 / 1",
-                            "backgroundColor": current_theme["tabBackgroundColor"],
+                            "aspectRatio": "1 / 1",  # Ensures a square aspect ratio
+                            "backgroundColor": "#333",
                             "padding": "10px",
                             "borderRadius": "10px",
                             "display": "flex",
@@ -264,33 +260,36 @@ def create_execute_tab(current_theme):
                     ),
                 ],
             ),
-            # Scaled content starts here (unchanged)
+            # Scaled content starts here
             html.Div(
                 style={
-                    "transform": "scale(0.75)",
-                    "transformOrigin": "top left",
-                    "width": "133%",
+                    "transform": "scale(0.75)",  # Apply scaling to 75%
+                    "transformOrigin": "top left",  # Keep scaling from the top left corner
+                    "width": "133%",  # Compensate width for scaling to fit the space
                 },
                 children=[
+                    # Control panel with radio buttons, text fields, and execute button
                     html.Div(
                         style={
                             "marginTop": "40px",
                             "padding": "20px",
-                            "backgroundColor": current_theme["tabBackgroundColor"],
+                            "backgroundColor": "#333",
                             "borderRadius": "10px",
                             "textAlign": "center",
                         },
                         children=[
+                            # Label for radio button group
                             html.Label(
                                 "City Distribution Options:",
                                 style={
-                                    "color": current_theme["color"],
+                                    "color": "white",
                                     "fontSize": "22px",
                                     "fontWeight": "bold",
                                     "display": "block",
                                     "marginBottom": "15px",
                                 },
                             ),
+                            # Radio buttons for selecting options (including Upload File option)
                             dcc.RadioItems(
                                 id="radio-options",
                                 options=[
@@ -302,10 +301,11 @@ def create_execute_tab(current_theme):
                                     {"label": "Upload File", "value": "file"},
                                 ],
                                 value="square",
-                                style={"marginBottom": "20px", "color": current_theme["color"]},
+                                style={"marginBottom": "20px", "color": "white"},
                                 labelStyle={"display": "inline-block", "marginRight": "20px", "fontSize": "20px"},
                                 inputStyle={"marginRight": "10px", "transform": "scale(1.8)"},
                             ),
+                            # File upload field (shown only when Upload File is selected)
                             html.Div(
                                 id="file-upload-div",
                                 children=[
@@ -329,16 +329,18 @@ def create_execute_tab(current_theme):
                                 style={"display": "none"},
                             ),
                             html.Br(),
+                            # Label for SA algorithm parameters
                             html.Label(
                                 "Simulated Annealing Parameters:",
                                 style={
-                                    "color": current_theme["color"],
+                                    "color": "white",
                                     "fontSize": "22px",
                                     "fontWeight": "bold",
                                     "display": "block",
                                     "marginBottom": "15px",
                                 },
                             ),
+                            # Text fields for parameters (aligned properly)
                             html.Div(
                                 style={
                                     "marginTop": "20px",
@@ -347,13 +349,13 @@ def create_execute_tab(current_theme):
                                     "gap": "30px",
                                 },
                                 children=[
-                                    # Example of parameter input field
+                                    # Number of Cities
                                     html.Div(
                                         children=[
                                             html.Label(
                                                 "num_cities:",
                                                 style={
-                                                    "color": current_theme["color"],
+                                                    "color": "white",
                                                     "fontSize": "20px",
                                                     "marginBottom": "8px",
                                                 },
@@ -367,296 +369,122 @@ def create_execute_tab(current_theme):
                                         ],
                                         style={"textAlign": "left"},
                                     ),
-                                    # Add other parameters similarly...
+                                    html.Div(
+                                        children=[
+                                            html.Label(
+                                                "tabu_size:",
+                                                style={
+                                                    "color": "white",
+                                                    "fontSize": "20px",
+                                                    "marginBottom": "8px",
+                                                },
+                                            ),
+                                            dcc.Input(
+                                                id="tabu-size",
+                                                type="number",
+                                                value=10,
+                                                style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                            ),
+                                        ],
+                                        style={"textAlign": "left"},
+                                    ),
+                                    # neighborhood_size
+                                    html.Div(
+                                        children=[
+                                            html.Label(
+                                                "neighborhood_size:",
+                                                style={
+                                                    "color": "white",
+                                                    "fontSize": "20px",
+                                                    "marginBottom": "8px",
+                                                },
+                                            ),
+                                            dcc.Input(
+                                                id="neighborhood-size",
+                                                type="number",
+                                                value=500,
+                                                style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                            ),
+                                        ],
+                                        style={"textAlign": "left"},
+                                    ),
+                                    # Elite Size
+                                    html.Div(
+                                        children=[
+                                            html.Label(
+                                                "restart_threshold:",
+                                                style={
+                                                    "color": "white",
+                                                    "fontSize": "20px",
+                                                    "marginBottom": "8px",
+                                                },
+                                            ),
+                                            dcc.Input(
+                                                id="restart-threshold",
+                                                type="number",
+                                                value=50,
+                                                style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                            ),
+                                        ],
+                                        style={"textAlign": "left"},
+                                    ),
+                                    html.Div(
+                                        children=[
+                                            html.Label(
+                                                "max_tries:",
+                                                style={
+                                                    "color": "white",
+                                                    "fontSize": "20px",
+                                                    "marginBottom": "8px",
+                                                },
+                                            ),
+                                            dcc.Input(
+                                                id="max_tries",
+                                                type="number",
+                                                value=100,
+                                                style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
+                                            ),
+                                        ],
+                                        style={"textAlign": "left"},
+                                    ),
+                                ],
+                            ),
+                            html.Br(),
+                            # Execute button centered in the container
+                            html.Div(
+                                style={
+                                    "marginTop": "30px",
+                                    "display": "flex",
+                                    "justifyContent": "center",
+                                    "alignItems": "center",
+                                },
+                                children=[
+                                    html.Button(
+                                        "Execute",
+                                        id="execute-button",
+                                        n_clicks=0,
+                                        style={
+                                            "padding": "20px 40px",
+                                            "fontSize": "18px",
+                                            "borderRadius": "10px",
+                                            "backgroundColor": "#007bff",
+                                            "color": "white",
+                                            "border": "none",
+                                            "cursor": "pointer",
+                                        },
+                                    ),
                                 ],
                             ),
                         ],
                     ),
+                    # Notification for file upload
+                    html.Div(id="upload-notification", children=[]),
+                    # Store to hold parsed file data
+                    dcc.Store(id='parsed-data-store', storage_type='memory')
                 ],
             ),
         ],
     )
-
-
-# App layout
-execute_tab = html.Div(
-    style={"backgroundColor": "#1e1e1e", "color": "white", "padding": "20px"},
-    children=[
-        html.Div(
-            style={"display": "flex", "flexDirection": "row", "justifyContent": "space-between", "alignItems": "center"},
-            children=[
-                # Plot 1 with total distance label
-                html.Div(
-                    children=[
-                        dcc.Graph(id="plot1", style={"width": "100%", "height": "100%"}),  # Ensures square graph
-                        html.Div(
-                            children=[
-                                html.Label(
-                                    id="total-distance-label-plot1",
-                                    children="Distance: 0 m",
-                                    style={
-                                        "color": "white",
-                                        "fontSize": "18px",
-                                        "textAlign": "center",
-                                        "display": "block",
-                                    },
-                                ),
-                            ],
-                            style={"marginTop": "10px", "textAlign": "center"},
-                        ),
-                    ],
-                    style={
-                        "width": "49%",
-                        "aspectRatio": "1 / 1",  # Ensures a square aspect ratio
-                        "backgroundColor": "#333",
-                        "padding": "10px",
-                        "borderRadius": "10px",
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                    },
-                ),
-                # Plot 2 with total distance label
-                html.Div(
-                    children=[
-                        dcc.Graph(id="plot2", style={"width": "100%", "height": "100%"}),  # Ensures square graph
-                        html.Div(
-                            children=[
-                                html.Label(
-                                    id="total-distance-label-plot2",
-                                    children="Distance: 0 m",
-                                    style={
-                                        "color": "white",
-                                        "fontSize": "18px",
-                                        "textAlign": "center",
-                                        "display": "block",
-                                    },
-                                ),
-                            ],
-                            style={"marginTop": "10px", "textAlign": "center"},
-                        ),
-                    ],
-                    style={
-                        "width": "49%",
-                        "aspectRatio": "1 / 1",  # Ensures a square aspect ratio
-                        "backgroundColor": "#333",
-                        "padding": "10px",
-                        "borderRadius": "10px",
-                        "display": "flex",
-                        "flexDirection": "column",
-                        "alignItems": "center",
-                        "justifyContent": "center",
-                    },
-                ),
-            ],
-        ),
-        # Scaled content starts here
-        html.Div(
-            style={
-                "transform": "scale(0.75)",  # Apply scaling to 75%
-                "transformOrigin": "top left",  # Keep scaling from the top left corner
-                "width": "133%",  # Compensate width for scaling to fit the space
-            },
-            children=[
-                # Control panel with radio buttons, text fields, and execute button
-                html.Div(
-                    style={
-                        "marginTop": "40px",
-                        "padding": "20px",
-                        "backgroundColor": "#333",
-                        "borderRadius": "10px",
-                        "textAlign": "center",
-                    },
-                    children=[
-                        # Label for radio button group
-                        html.Label(
-                            "City Distribution Options:",
-                            style={
-                                "color": "white",
-                                "fontSize": "22px",
-                                "fontWeight": "bold",
-                                "display": "block",
-                                "marginBottom": "15px",
-                            },
-                        ),
-                        # Radio buttons for selecting options (including Upload File option)
-                        dcc.RadioItems(
-                            id="radio-options",
-                            options=[
-                                {"label": "Random", "value": "random"},
-                                {"label": "Square", "value": "square"},
-                                {"label": "Circle", "value": "circle"},
-                                {"label": "Triangle", "value": "triangle"},
-                                {"label": "Hexagon", "value": "hexagon"},
-                                {"label": "Upload File", "value": "file"},
-                            ],
-                            value="square",
-                            style={"marginBottom": "20px", "color": "white"},
-                            labelStyle={"display": "inline-block", "marginRight": "20px", "fontSize": "20px"},
-                            inputStyle={"marginRight": "10px", "transform": "scale(1.8)"},
-                        ),
-                        # File upload field (shown only when Upload File is selected)
-                        html.Div(
-                            id="file-upload-div",
-                            children=[
-                                dcc.Upload(
-                                    id="file-upload",
-                                    children=html.Div(["Drag and Drop or ", html.A("Select a File")]),
-                                    style={
-                                        "width": "50%",
-                                        "height": "60px",
-                                        "lineHeight": "60px",
-                                        "borderWidth": "1px",
-                                        "borderStyle": "dashed",
-                                        "borderRadius": "10px",
-                                        "textAlign": "center",
-                                        "margin": "auto",
-                                        "color": "white",
-                                    },
-                                    multiple=False,
-                                )
-                            ],
-                            style={"display": "none"},
-                        ),
-                        html.Br(),
-                        # Label for SA algorithm parameters
-                        html.Label(
-                            "Simulated Annealing Parameters:",
-                            style={
-                                "color": "white",
-                                "fontSize": "22px",
-                                "fontWeight": "bold",
-                                "display": "block",
-                                "marginBottom": "15px",
-                            },
-                        ),
-                        # Text fields for parameters (aligned properly)
-                        html.Div(
-                            style={
-                                "marginTop": "20px",
-                                "display": "grid",
-                                "gridTemplateColumns": "repeat(3, 1fr)",
-                                "gap": "30px",
-                            },
-                            children=[
-                                # Number of Cities
-                                html.Div(
-                                    children=[
-                                        html.Label(
-                                            "num_cities:",
-                                            style={
-                                                "color": "white",
-                                                "fontSize": "20px",
-                                                "marginBottom": "8px",
-                                            },
-                                        ),
-                                        dcc.Input(
-                                            id="num-cities",
-                                            type="number",
-                                            value=20,
-                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
-                                        ),
-                                    ],
-                                    style={"textAlign": "left"},
-                                ),
-                                # neighborhood_size
-                                html.Div(
-                                    children=[
-                                        html.Label(
-                                            "neighborhood_size:",
-                                            style={
-                                                "color": "white",
-                                                "fontSize": "20px",
-                                                "marginBottom": "8px",
-                                            },
-                                        ),
-                                        dcc.Input(
-                                            id="neighborhood-size",
-                                            type="number",
-                                            value=500,
-                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
-                                        ),
-                                    ],
-                                    style={"textAlign": "left"},
-                                ),
-                                # Elite Size
-                                html.Div(
-                                    children=[
-                                        html.Label(
-                                            "restart_threshold:",
-                                            style={
-                                                "color": "white",
-                                                "fontSize": "20px",
-                                                "marginBottom": "8px",
-                                            },
-                                        ),
-                                        dcc.Input(
-                                            id="restart-threshold",
-                                            type="number",
-                                            value=50,
-                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
-                                        ),
-                                    ],
-                                    style={"textAlign": "left"},
-                                ),
-                                html.Div(
-                                    children=[
-                                        html.Label(
-                                            "max_tries:",
-                                            style={
-                                                "color": "white",
-                                                "fontSize": "20px",
-                                                "marginBottom": "8px",
-                                            },
-                                        ),
-                                        dcc.Input(
-                                            id="max_tries",
-                                            type="number",
-                                            value=100,
-                                            style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
-                                        ),
-                                    ],
-                                    style={"textAlign": "left"},
-                                ),
-                            ],
-                        ),
-                        html.Br(),
-                        # Execute button centered in the container
-                        html.Div(
-                            style={
-                                "marginTop": "30px",
-                                "display": "flex",
-                                "justifyContent": "center",
-                                "alignItems": "center",
-                            },
-                            children=[
-                                html.Button(
-                                    "Execute",
-                                    id="execute-button",
-                                    n_clicks=0,
-                                    style={
-                                        "padding": "20px 40px",
-                                        "fontSize": "18px",
-                                        "borderRadius": "10px",
-                                        "backgroundColor": "#007bff",
-                                        "color": "white",
-                                        "border": "none",
-                                        "cursor": "pointer",
-                                    },
-                                ),
-                            ],
-                        ),
-                    ],
-                ),
-                # Notification for file upload
-                html.Div(id="upload-notification", children=[]),
-                # Store to hold parsed file data
-                dcc.Store(id='parsed-data-store', storage_type='memory')
-            ],
-        ),
-    ],
-)
 
 @app.callback(
     Output("tabs-content", "children"),
@@ -694,7 +522,7 @@ def update_layout(selected_tab, n_clicks, current_theme):
 
     # Update the tab content
     if selected_tab == "main":
-        tab_content = execute_tab
+        tab_content = create_execute_tab(current_theme_data)
     elif selected_tab == "statistics":
         tab_content = create_statistics_tab_layout(current_theme_data)
     else:
@@ -838,13 +666,14 @@ def parse_input(contents, filename):
         State("radio-options", "value"),
         State("parsed-data-store", "data"),
         State("num-cities", "value"),
+        State("tabu-size", "value"),
         State("neighborhood-size", "value"),
         State("restart-threshold", "value"),
         State("max_tries", "value"),
         State("theme-store", "data"),
     ],
 )
-def update_plots(n_clicks, selected_option, uploaded_data, num_cities,
+def update_plots(n_clicks, selected_option, uploaded_data, num_cities, tabu_size,
                  neighborhood_size, restart_threshold, max_tries,theme):
     # Generate or load city data
     if (theme == "light"):
@@ -869,13 +698,16 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities,
 
     # Simulated Annealing solution
     TS_best_solution_distance = float("inf")
-    TS_best_solution = tabu_search(data_model, max_iter=max_tries, neighborhood_size=neighborhood_size)
+    TS_best_solution = tabu_search(data_model,tabu_size=tabu_size, max_iter=max_tries, neighborhood_size=neighborhood_size)
     TS_best_solution[1].append(TS_best_solution[1][0])
     TS_best_solution_distance = TS_best_solution[2]
     TS_best_route = TS_best_solution[1]
 
+    print("Tabu Search")
     TS_distance_label = f"Distance: {TS_best_solution_distance:5.3f} m"
-
+    print("\t"+TS_distance_label)
+    print("\tRoute SA:\n\t",end = "")
+    print_route(TS_best_route)
     # Determine dimensionality of the data
     dimensions = len(data_model["locations"][0])
     is_3d = dimensions == 3
@@ -941,7 +773,7 @@ def add_plot_traces(fig, locations, route, is_3d, current_theme):
         fig.add_trace(go.Scatter3d(
             x=x_coords, y=y_coords, z=z_coords,
             mode='markers+text',
-            marker=dict(size=7, color=marker_color),  # Dynamic marker color
+            marker=dict(size=3, color=marker_color),  # Dynamic marker color
             text=[str(i) for i in range(len(locations))],
             textfont=dict(color=node_color),  # Dynamic text color
             name='Nodes'
