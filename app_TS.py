@@ -113,7 +113,7 @@ app.layout = html.Div(
                     value="main",
                     children=[
                         dcc.Tab(
-                            label="Simulated Annealing Dashboard",
+                            label="Tabu Search Dashboard",
                             value="main",
                             style={"backgroundColor": "#333", "color": "white"},
                             selected_style={"backgroundColor": "#007bff", "color": "white"},
@@ -689,12 +689,6 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, tabu_size
     data_model = create_data_model(cities)
     distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
 
-    # Benchmark solution
-    solution_benchmark = benchmark(data_model["locations"])
-    route_bench = find_route(solution_benchmark[1], solution_benchmark[2])
-    benchmark_dist = calculate_route_distance(distance_matrix, route_bench)
-    benchmark_distance_label = f"Distance benchmark: {benchmark_dist:5.0f} m"
-
     # Simulated Annealing solution
     TS_best_solution_distance = float("inf")
     TS_best_solution = tabu_search(data_model,tabu_size=tabu_size, max_iter=max_tries, neighborhood_size=neighborhood_size)
@@ -705,8 +699,18 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, tabu_size
     print("Tabu Search")
     TS_distance_label = f"Distance: {TS_best_solution_distance:5.3f} m"
     print("\t"+TS_distance_label)
-    print("\tRoute SA:\n\t",end = "")
+    print("\tRoute TS:\n\t",end = "")
     print_route(TS_best_route)
+
+    # Benchmark solution
+    solution_benchmark = benchmark(data_model["locations"])
+    route_bench = find_route(solution_benchmark[1], solution_benchmark[2])
+    benchmark_dist = calculate_route_distance(distance_matrix, route_bench)
+    benchmark_distance_label = f"Distance benchmark: {benchmark_dist:5.3f} m"
+    print(benchmark_distance_label)
+    print("Route Benchmark:\n\t",end = "")
+    print_route(route_bench)
+
     # Determine dimensionality of the data
     dimensions = len(data_model["locations"][0])
     is_3d = dimensions == 3
