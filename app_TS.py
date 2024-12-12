@@ -330,7 +330,7 @@ def create_execute_tab(current_theme):
                             html.Br(),
                             # Label for SA algorithm parameters
                             html.Label(
-                                "Simulated Annealing Parameters:",
+                                "Tabu Search Parameters:",
                                 style={
                                     "color": "white",
                                     "fontSize": "22px",
@@ -544,7 +544,7 @@ def update_layout(selected_tab, n_clicks, current_theme):
     }
     tabs_children = [
         dcc.Tab(
-            label="Simulated Annealing Dashboard",
+            label="Tabu Search Annealing Dashboard",
             value="main",
             style={
                 "backgroundColor": current_theme_data["tabBackgroundColor"],
@@ -846,4 +846,4 @@ def display_statistics(data):
         return 'No data available.'
 # Run app
 if __name__ == "__main__":
-    app.run_server(debug=True, port=12345)
+    app.run_server(debug=False, port=12345)
