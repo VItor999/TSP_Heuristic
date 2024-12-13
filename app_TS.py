@@ -504,8 +504,8 @@ def update_layout(selected_tab, n_clicks, current_theme):
 
     # Default theme if no action
     if not n_clicks:
-        current_theme_data = dark_theme
-        next_theme = "dark"
+        current_theme_data = light_theme
+        next_theme = "light"
     else:
         # Toggle theme only when the button is clicked
         if trigger == "color-scheme-toggle":
