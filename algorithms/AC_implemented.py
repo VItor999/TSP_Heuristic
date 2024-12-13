@@ -114,13 +114,13 @@ def ant_colony(data_model,alpha = 1, beta = 2, rho = 0.1, q_constant = 20, gener
         ant_list.clear()
         ant_list = init_colony(ordered_cities)
     print(best_distance)    
-    return solution
+    return solution, best_distance
 
 if __name__ == "__main__":
 
     points = parse_input('ale_99cidades3D.txt')#generate_random_points(20,dim=3)
     data_model = create_data_model(points)
-    solution = ant_colony(data_model, alpha = 1, beta = 2, rho = 0.1, q_constant = 100, generations = 200)
+    solution, distance = ant_colony(data_model, alpha = 1, beta = 2, rho = 0.1, q_constant = 100, generations = 200)
     #solution[1].append(solution[1][0])
     print_route(solution)
     plot_locations_with_connections(data_model["locations"], solution)
