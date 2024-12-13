@@ -47,12 +47,17 @@ if __name__ == "__main__":
     AC_best_solution_distance = AC_solution[1]
     print(f"Distance: {AC_best_solution_distance:.2f}  m\n")
     print_route(AC_best_route)
-    plot_locations_with_connections(data_model["locations"], AC_best_route, f"Solution found using AC:{AC_best_solution_distance:.2f}")
+    plot_locations_with_connections(data_model["locations"], AC_best_route, f"Solution found using AC: {AC_best_solution_distance:.3f} m")
 
     print("################# Benchmark Solution #################")
     solution_benchmark = benchmark(data_model["locations"])
-    print_solution(solution_benchmark[0], solution_benchmark[1], solution_benchmark[2])
-    route = find_route(solution_benchmark[1], solution_benchmark[2])
-    plot_locations_with_connections(solution_benchmark[3]["locations"], route, "Solution found using benchmark")
+    route_bench = find_route(solution_benchmark[1], solution_benchmark[2])
+    distance_matrix = compute_euclidean_distance_matrix(data_model["locations"])
+    benchmark_dist = calculate_route_distance(distance_matrix, route_bench)
+    benchmark_distance_label = f"Distance benchmark: {benchmark_dist:5.3f} m"
+    print(benchmark_distance_label)
+    print("Route Benchmark:\n\t",end = "")
+    print_route(route_bench)
+    plot_locations_with_connections(solution_benchmark[3]["locations"], route_bench, f"Solution found using benchmark: {benchmark_dist:5.3f} m")
 
     input("Press Enter to exit...\n")
