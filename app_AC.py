@@ -382,7 +382,7 @@ def create_execute_tab(current_theme):
                                             dcc.Input(
                                                 id="alpha_",
                                                 type="number",
-                                                value=1,
+                                                value=1.5,
                                                 style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                             ),
                                         ],
@@ -402,7 +402,7 @@ def create_execute_tab(current_theme):
                                             dcc.Input(
                                                 id="beta_",
                                                 type="",
-                                                value=2,
+                                                value=3,
                                                 style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                             ),
                                         ],
@@ -422,7 +422,7 @@ def create_execute_tab(current_theme):
                                             dcc.Input(
                                                 id="rho_",
                                                 type="number",
-                                                value=0.1,
+                                                value=0.2,
                                                 step=0.005,
                                                 style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                             ),
@@ -442,7 +442,7 @@ def create_execute_tab(current_theme):
                                             dcc.Input(
                                                 id="q-constant",
                                                 type="number",
-                                                value=100,
+                                                value=25000,
                                                 style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                             ),
                                         ],
@@ -461,7 +461,7 @@ def create_execute_tab(current_theme):
                                             dcc.Input(
                                                 id="generations_",
                                                 type="number",
-                                                value=200,
+                                                value=350,
                                                 style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                             ),
                                         ],
@@ -714,7 +714,6 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, alpha,
     # Simulated Annealing solution
     AC_best_solution_distance = float("inf")
     # alfa = 1, beta= 2 
-    solution = ant_colony(data_model, alpha = 1, beta = 2, rho = 0.1, q_constant = 100, generations = 200)
     AC_solution = ant_colony(data_model, alpha = alpha, beta = beta, rho = rho, q_constant = q_constant, generations = generations)
     AC_best_route = AC_solution[0]
     AC_best_solution_distance = AC_solution[1]
