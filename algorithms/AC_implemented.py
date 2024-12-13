@@ -109,7 +109,8 @@ def ant_colony(data_model,alpha = 1, beta = 2, rho = 0.1, q_constant = 20, gener
             if best_distance == 0 or distance < best_distance:
                 best_distance = distance
                 solution = ant_list[ant]
-                print(best_distance)
+        if g % 20 == 0:
+            print(f"Generation {g:4d} distance: {best_distance:.2f}")
         pheromone_matrix = update_pheromone(ant_list,pheromone_matrix,distance_matrix,rho,q_constant)
         ant_list.clear()
         ant_list = init_colony(ordered_cities)
