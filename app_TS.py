@@ -381,7 +381,7 @@ def create_execute_tab(current_theme):
                                             dcc.Input(
                                                 id="tabu-size",
                                                 type="number",
-                                                value=10,
+                                                value=25,
                                                 style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                             ),
                                         ],
@@ -440,7 +440,7 @@ def create_execute_tab(current_theme):
                                             dcc.Input(
                                                 id="max_tries",
                                                 type="number",
-                                                value=100,
+                                                value=500,
                                                 style={"width": "100%", "padding": "8px", "borderRadius": "5px"},
                                             ),
                                         ],
@@ -740,7 +740,7 @@ def update_plots(n_clicks, selected_option, uploaded_data, num_cities, tabu_size
     # Generate Simulated Annealing Plot
     add_plot_traces(fig2, data_model["locations"], TS_best_route, is_3d,current_theme)
     fig2.update_layout(
-        title=f"Tabus Search: {TS_best_solution_distance:5.3f} m",
+        title=f"Tabu Search: {TS_best_solution_distance:5.3f} m",
         plot_bgcolor=current_theme["plotlyTheme"]["layout"]["plot_bgcolor"],  # Use theme for plot background
         paper_bgcolor=current_theme["plotlyTheme"]["layout"]["paper_bgcolor"],  # Use theme for paper background
         font={"color": current_theme["color"]},  # Use theme font color
