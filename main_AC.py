@@ -47,7 +47,7 @@ if __name__ == "__main__":
     AC_best_solution_distance = AC_solution[1]
     print(f"Distance: {AC_best_solution_distance:.2f}  m\n")
     print_route(AC_best_route)
-    plot_locations_with_connections(data_model["locations"], AC_best_route, "Solution found using AC")
+    plot_locations_with_connections(data_model["locations"], AC_best_route, f"Solution found using AC:{AC_best_solution_distance:.2f}")
 
     print("################# Benchmark Solution #################")
     solution_benchmark = benchmark(data_model["locations"])
