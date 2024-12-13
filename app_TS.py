@@ -84,7 +84,7 @@ app.layout = html.Div(
                     style={"display": "flex", "justifyContent": "space-between", "alignItems": "center"},
                     children=[
                         html.H1(
-                            "Genetic Algorithm Application",
+                            "TSP Solver  Application",
                             id="app-title",
                             style={"textAlign": "center", "marginBottom": "20px", "flex": "1"},
                         ),
@@ -544,7 +544,7 @@ def update_layout(selected_tab, n_clicks, current_theme):
     }
     tabs_children = [
         dcc.Tab(
-            label="Tabu Search Annealing Dashboard",
+            label="Tabu Search Dashboard",
             value="main",
             style={
                 "backgroundColor": current_theme_data["tabBackgroundColor"],
